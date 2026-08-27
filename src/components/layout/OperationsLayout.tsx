@@ -1,9 +1,9 @@
-import { CalendarDays, CarFront, Gauge, LogOut, Map, Mountain, Settings, UsersRound } from 'lucide-react'
+import { CalendarDays, CarFront, Gauge, LogOut, Map, MapPin, Mountain, UsersRound } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '@/lib/cn'
 import { useAuth } from '@/features/auth/auth-context'
 
-const adminLinks = [['/admin', 'Dashboard', Gauge], ['/admin/bookings', 'Bookings', CalendarDays], ['/admin/tours', 'Tours', Map], ['/admin/cars', 'Cars', CarFront], ['/admin/drivers', 'Drivers', UsersRound], ['/admin/settings', 'Settings', Settings]] as const
+const adminLinks = [['/admin', 'Dashboard', Gauge], ['/admin/bookings', 'Bookings', CalendarDays], ['/admin/calendar', 'Calendar', CalendarDays], ['/admin/tours', 'Tours', Map], ['/admin/destinations', 'Destinations', MapPin], ['/admin/cars', 'Cars', CarFront], ['/admin/drivers', 'Drivers', UsersRound]] as const
 
 export function OperationsLayout({ driver = false }: { driver?: boolean }) {
   const { user, logout } = useAuth()

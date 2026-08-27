@@ -1,0 +1,7 @@
+import { useQuery } from '@tanstack/react-query'
+import { CalendarDays, MapPin, Users } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { driverApi } from '@/features/driver/api'
+import { StatusBadge } from '@/components/operations/StatusBadge'
+
+export function DriverTripsPage(){const query=useQuery({queryKey:['driver','trips'],queryFn:()=>driverApi.trips()});return <div><p className="text-sm font-semibold uppercase tracking-widest text-apricot">Driver workspace</p><h1 className="mt-2 text-3xl font-bold">My assigned trips</h1><div className="mt-7 grid gap-4">{query.data?.data.map(trip=><Link to={`/driver/trips/${trip.id}`} key={trip.id} className="rounded-3xl bg-white p-5 shadow-sm transition hover:-translate-y-0.5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs text-ink/40">{trip.booking_number}</p><h2 className="mt-1 text-xl font-bold">{trip.customer.name}</h2></div><StatusBadge status={trip.driver_trip_status??trip.booking_status}/></div><div className="mt-5 grid gap-3 text-sm text-ink/60 sm:grid-cols-3"><span className="flex gap-2"><CalendarDays className="size-4 text-apricot"/>{trip.booking_date} · {trip.pickup_time.slice(0,5)}</span><span className="flex gap-2"><MapPin className="size-4 text-apricot"/>{trip.pickup.address}</span><span className="flex gap-2"><Users className="size-4 text-apricot"/>{trip.passengers} passengers</span></div></Link>)}{query.data?.data.length===0&&<div className="rounded-3xl bg-white p-10 text-center text-ink/45">No assigned trips.</div>}</div></div>}

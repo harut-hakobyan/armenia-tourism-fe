@@ -6,7 +6,13 @@ import { RequireRole } from '@/features/auth/RequireRole'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { OperationsPage } from '@/pages/OperationsPage'
+import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
+import { AdminBookingsPage } from '@/pages/admin/AdminBookingsPage'
+import { AdminBookingDetailsPage } from '@/pages/admin/AdminBookingDetailsPage'
+import { AdminCalendarPage } from '@/pages/admin/AdminCalendarPage'
+import { AdminDirectoryPage } from '@/pages/admin/AdminDirectoryPage'
+import { DriverTripsPage } from '@/pages/driver/DriverTripsPage'
+import { DriverTripDetailsPage } from '@/pages/driver/DriverTripDetailsPage'
 
 const ToursPage = lazy(() => import('@/pages/catalog/ToursPage').then((module) => ({ default: module.ToursPage })))
 const TourDetailsPage = lazy(() => import('@/pages/catalog/TourDetailsPage').then((module) => ({ default: module.TourDetailsPage })))
@@ -22,8 +28,6 @@ const contentPages = () => import('@/pages/content/ContentPages')
 const AboutPage = lazy(() => contentPages().then((module) => ({ default: module.AboutPage })))
 const ContactPage = lazy(() => contentPages().then((module) => ({ default: module.ContactPage })))
 const FaqPage = lazy(() => contentPages().then((module) => ({ default: module.FaqPage })))
-
-const operation = (title: string) => <OperationsPage title={title} />
 
 export const router = createBrowserRouter([
   {
@@ -54,27 +58,22 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: <RequireRole roles={['admin', 'manager']}><OperationsLayout /></RequireRole>,
     children: [
-      { index: true, element: operation('Dashboard') },
-      { path: 'bookings', element: operation('Bookings') },
-      { path: 'bookings/:id', element: operation('Booking Details') },
-      { path: 'tours', element: operation('Tours') },
-      { path: 'tours/create', element: operation('Create Tour') },
-      { path: 'tours/:id/edit', element: operation('Edit Tour') },
-      { path: 'destinations', element: operation('Destinations') },
-      { path: 'cars', element: operation('Cars') },
-      { path: 'drivers', element: operation('Drivers') },
-      { path: 'customers', element: operation('Customers') },
-      { path: 'reviews', element: operation('Reviews') },
-      { path: 'promo-codes', element: operation('Promo Codes') },
-      { path: 'settings', element: operation('Settings') },
+      { index: true, element: <AdminDashboardPage /> },
+      { path: 'bookings', element: <AdminBookingsPage /> },
+      { path: 'bookings/:id', element: <AdminBookingDetailsPage /> },
+      { path: 'calendar', element: <AdminCalendarPage /> },
+      { path: 'tours', element: <AdminDirectoryPage type="tours" /> },
+      { path: 'destinations', element: <AdminDirectoryPage type="destinations" /> },
+      { path: 'cars', element: <AdminDirectoryPage type="cars" /> },
+      { path: 'drivers', element: <AdminDirectoryPage type="drivers" /> },
     ],
   },
   {
     path: '/driver',
     element: <RequireRole roles={['driver']}><OperationsLayout driver /></RequireRole>,
     children: [
-      { index: true, element: operation('My Assigned Trips') },
-      { path: 'trips/:id', element: operation('Trip Details') },
+      { index: true, element: <DriverTripsPage /> },
+      { path: 'trips/:id', element: <DriverTripDetailsPage /> },
     ],
   },
 ])
