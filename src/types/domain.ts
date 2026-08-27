@@ -1,0 +1,118 @@
+export type Currency = 'EUR' | 'USD' | 'AMD'
+export type UserRole = 'admin' | 'manager' | 'driver' | 'customer'
+export type ServiceType = 'tour' | 'airport_transfer' | 'private_driver' | 'custom_trip'
+export type PricingType = 'per_car' | 'per_person' | 'fixed' | 'custom'
+export type BookingStatus = 'pending' | 'confirmed' | 'assigned' | 'driver_on_the_way' | 'driver_arrived' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
+export type DriverTripStatus = 'assigned' | 'on_the_way' | 'arrived' | 'passenger_picked_up' | 'trip_started' | 'completed'
+
+export interface Media { uuid: string; url: string; alt_text: string | null; mime_type: string }
+export interface SeoFields { title: string | null; description: string | null }
+
+export interface Destination {
+  id: number
+  slug: string
+  locale: string
+  name: string
+  short_description: string | null
+  description: string | null
+  coordinates: { latitude: number | null; longitude: number | null }
+  address: string | null
+  featured: boolean
+  cover_image: Media | null
+  gallery: Media[]
+  seo: SeoFields
+}
+
+export interface TourCategory { id: number; slug: string; locale: string; name: string; description: string | null; seo: SeoFields }
+
+export interface TourStop {
+  day_number: number
+  stop_order: number
+  duration_minutes: number | null
+  optional: boolean
+  notes: string | null
+  destination: { slug: string; name: string; latitude: number | null; longitude: number | null } | null
+}
+
+export interface Tour {
+  id: number
+  slug: string
+  locale: string
+  title: string
+  short_description: string | null
+  description: string | null
+  category: TourCategory | null
+  duration_minutes: number
+  approximate_distance_km: number | null
+  starting_price: { amount_minor: number; currency: Currency; pricing_type: PricingType }
+  max_passengers: number | null
+  pickup_available: boolean
+  dropoff_available: boolean
+  free_cancellation_hours: number
+  featured: boolean
+  cover_image: Media | null
+  gallery: Media[]
+  itinerary?: TourStop[]
+  days?: Array<{ day_number: number; title: string | null; description: string | null; overnight_location: string | null }>
+  seo: SeoFields
+}
+
+export interface Car {
+  id: number
+  name: string
+  brand: string
+  model: string
+  year: number
+  color: string
+  category: 'economy' | 'comfort' | 'business' | 'suv' | 'minivan' | 'premium'
+  passenger_capacity: number
+  luggage_capacity: number
+  transmission: string
+  features: { air_conditioning: boolean; wifi: boolean; child_seat_available: boolean }
+  rates: { base_minor: number; per_km_minor: number; per_hour_minor: number; currency: Currency }
+  cover_image: Media | null
+  gallery: Media[]
+}
+
+export interface User { id: number; name: string; first_name: string | null; last_name: string | null; email: string; phone: string | null; role: UserRole; locale: string }
+
+export interface PriceBreakdown { base_minor: number; adjustments: Record<string, number>; subtotal_minor: number; discount_minor: number; total_minor: number; currency: Currency; promo_code: string | null }
+export interface RoutePoint { latitude: number; longitude: number; label?: string }
+
+export interface Estimate {
+  service_type: ServiceType
+  car: { id: number; name: string }
+  passengers: number
+  duration_minutes?: number
+  estimated_distance_meters?: number
+  estimated_driving_minutes?: number
+  estimated_duration_minutes?: number
+  route_provider?: string
+  route_points?: RoutePoint[]
+  price: PriceBreakdown
+}
+
+export interface Booking {
+  booking_number: string
+  service_type: ServiceType
+  booking_status: BookingStatus
+  driver_trip_status: DriverTripStatus | null
+  payment_status: string
+  payment_method: string
+  booking_date: string
+  pickup_time: string
+  starts_at: string
+  planned_end_at: string
+  pickup: { address: string; latitude: string | null; longitude: string | null }
+  dropoff: { address: string | null; latitude: string | null; longitude: string | null }
+  passengers: number
+  customer: { name: string; email: string | null; phone: string; whatsapp: string | null; nationality: string | null }
+  car: { id: number; name: string; category: string }
+  driver: { name: string; phone: string } | null
+  price: { subtotal_minor: number; discount_minor: number; deposit_amount_minor: number; total_minor: number; currency: Currency; breakdown: PriceBreakdown }
+  service_details: unknown
+  created_at: string
+}
+
+export interface CreatedBooking extends Booking { secure_token: string; public_url: string }
+export interface AdminBooking extends Booking { id: number; customer_id: number | null; tour_id: number | null; car_id: number; driver_id: number | null; promo_code_id: number | null; admin_notes: string | null; updated_at: string }
