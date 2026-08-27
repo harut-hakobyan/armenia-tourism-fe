@@ -5,7 +5,7 @@ export type PricingType = 'per_car' | 'per_person' | 'fixed' | 'custom'
 export type BookingStatus = 'pending' | 'confirmed' | 'assigned' | 'driver_on_the_way' | 'driver_arrived' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 export type DriverTripStatus = 'assigned' | 'on_the_way' | 'arrived' | 'passenger_picked_up' | 'trip_started' | 'completed'
 
-export interface Media { uuid: string; url: string; alt_text: string | null; mime_type: string }
+export interface Media { id: number; uuid: string; url: string; alt_text: string | null; mime_type: string }
 export interface SeoFields { title: string | null; description: string | null }
 
 export interface Destination {

@@ -1,11 +1,15 @@
 import { apiClient } from '@/lib/api-client'
 import type { PaginatedResponse, ApiEnvelope } from '@/types/api'
-import type { AdminBooking, AssignmentAvailability, BookingStatus, DashboardStats } from '@/types/domain'
+import type { AdminBooking, AssignmentAvailability, BookingStatus, DashboardStats, Media } from '@/types/domain'
 
 export interface AdminBookingFilters { page?: number; per_page?: number; booking_status?: BookingStatus; date_from?: string; date_to?: string; search?: string; car_id?: number; driver_id?: number }
 export type DirectoryType='tours'|'destinations'|'cars'|'drivers'
 export interface DirectoryItem { id:number; slug?:string; brand?:string; model?:string; plate_number?:string; first_name?:string; last_name?:string; active:boolean; featured?:boolean; available_for_booking?:boolean; translations?:Array<{locale:string;name?:string;title?:string}> }
 export interface DirectoryResponse { data:DirectoryItem[]; current_page:number; last_page:number; total:number }
+export type CmsType='customers'|'reviews'|'promo-codes'|'faqs'|'inquiries'|'audit-logs'
+export interface CmsItem { id:number; name?:string; first_name?:string; last_name?:string; email?:string; phone?:string; customer_name?:string; rating?:number; title?:string; review?:string; code?:string; type?:string; value?:number; currency?:string; category?:string; active?:boolean; verified?:boolean; status?:string; subject?:string; message?:string; bookings_count?:number; action?:string; created_at?:string; sort_order?:number; translations?:Array<{locale:string;question:string;answer:string}>; user?:{name:string}|null }
+export interface CmsResponse { data:CmsItem[]; current_page:number; last_page:number; total:number }
+export interface SettingItem { id:number; key:string; value:string|null; type:string; is_public:boolean }
 
 export const adminApi = {
   dashboard: async (): Promise<DashboardStats> =>
@@ -25,4 +29,14 @@ export const adminApi = {
     (await apiClient.get<ApiEnvelope<AssignmentAvailability>>(`/admin/bookings/${id}/availability`)).data.data,
   directory:async(type:DirectoryType):Promise<DirectoryResponse>=>(await apiClient.get<DirectoryResponse>(`/admin/directory/${type}`)).data,
   updateDirectory:async(type:DirectoryType,id:number,input:{active?:boolean;featured?:boolean;available_for_booking?:boolean}):Promise<DirectoryItem>=>(await apiClient.patch<ApiEnvelope<DirectoryItem>>(`/admin/directory/${type}/${id}`,input)).data.data,
+  uploadMedia:async(type:DirectoryType,id:number,file:File):Promise<Media>=>{const form=new FormData();form.append('file',file);form.append('collection',type==='drivers'?'profile':'gallery');return (await apiClient.post<ApiEnvelope<Media>>(`/admin/media/${type}/${id}`,form)).data.data},
+  cms:async(type:CmsType):Promise<CmsResponse>=>(await apiClient.get<CmsResponse>(`/admin/${type}`)).data,
+  updateReview:async(id:number,active:boolean):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/reviews/${id}`,{active})).data.data,
+  updatePromo:async(id:number,active:boolean):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/promo-codes/${id}`,{active})).data.data,
+  createPromo:async(input:{code:string;type:'percentage'|'fixed';value:number;currency:string;active:boolean}):Promise<CmsItem>=>(await apiClient.post<ApiEnvelope<CmsItem>>('/admin/promo-codes',input)).data.data,
+  createFaq:async(input:{category:string;active:boolean;sort_order:number;translations:Array<{locale:string;question:string;answer:string}>}):Promise<CmsItem>=>(await apiClient.post<ApiEnvelope<CmsItem>>('/admin/faqs',input)).data.data,
+  updateFaq:async(item:CmsItem,active:boolean):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/faqs/${item.id}`,{category:item.category,active,sort_order:item.sort_order??0,translations:item.translations})).data.data,
+  updateInquiry:async(id:number,status:'new'|'in_progress'|'resolved'):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/inquiries/${id}`,{status})).data.data,
+  settings:async():Promise<SettingItem[]>=>(await apiClient.get<ApiEnvelope<SettingItem[]>>('/admin/settings')).data.data,
+  updateSetting:async(id:number,value:string):Promise<SettingItem>=>(await apiClient.patch<ApiEnvelope<SettingItem>>(`/admin/settings/${id}`,{value})).data.data,
 }

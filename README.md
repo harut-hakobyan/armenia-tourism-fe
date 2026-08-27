@@ -55,4 +55,20 @@ Authentication uses a Sanctum bearer token stored in browser storage. Resource a
 - reorderable custom-trip builder with route and price estimates
 - mobile-first three-stage guest booking flow
 - booking confirmation and secure public booking-status page
-- About, Contact/WhatsApp, FAQ, responsive navigation, and route metadata
+- API-backed About, contact inquiry/WhatsApp, multilingual FAQ, responsive navigation, and route metadata
+
+## Implemented operations experience
+
+- role-protected admin dashboard, booking table, calendar, booking details, and conflict-safe assignment
+- active-state directories for tours, destinations, cars, and drivers with validated image upload
+- customers, review moderation, promo codes, FAQs, contact inquiries, website settings, and audit history
+- mobile-first driver trip list, customer contact actions, and controlled status progression
+
+## Production image
+
+```bash
+docker build --build-arg VITE_API_BASE_URL=https://api.example.com/api/v1 -t armenia-tourism-fe .
+docker run --rm -p 8080:80 armenia-tourism-fe
+```
+
+The image uses an Nginx SPA fallback and long-lived caching for fingerprinted assets. TLS should terminate at the deployment edge.
