@@ -20,7 +20,8 @@ export function HomePage() {
   const tours = useQuery(toursQuery(i18n.language, { featured: true, per_page: 3 }))
   return <>
     <section className="relative isolate overflow-hidden bg-ink text-white">
-      <div className="absolute inset-0 -z-10 opacity-35 [background:radial-gradient(circle_at_75%_30%,#d87948_0,transparent_28%),linear-gradient(125deg,#17231d_15%,#315846_100%)]" />
+      <img src="/images/armenia-garni-hero.png" alt="Garni Temple overlooking the Armenian highlands" className="absolute inset-0 -z-20 size-full object-cover object-[68%_center]" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(16,28,22,.94)_0%,rgba(16,28,22,.78)_42%,rgba(16,28,22,.12)_78%)]" />
       <div className="absolute -right-20 top-16 -z-10 size-96 rounded-full border border-white/10" />
       <Container className="grid min-h-[650px] items-center py-24 lg:grid-cols-[1fr_0.7fr]">
         <div className="max-w-3xl"><p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-apricot-light">{t('home.eyebrow')}</p><h1 className="text-display text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">{t('home.title')}</h1><p className="mt-7 text-lg text-white/75 sm:text-xl">{t('home.subtitle')}</p><div className="mt-9 flex flex-wrap gap-3"><Link to="/tours" className={buttonStyles()}>{t('actions.explore')}<ArrowRight className="ml-2 size-4" /></Link><Link to="/build-your-trip" className={buttonStyles('secondary')}>{t('actions.build')}</Link></div></div>

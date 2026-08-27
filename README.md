@@ -45,3 +45,14 @@ src/
 ```
 
 Authentication uses a Sanctum bearer token stored in browser storage. Resource access is still authoritatively enforced by Laravel policies; frontend guards are navigation UX, not a security boundary.
+
+## Implemented public experience
+
+- premium API-backed home page and original Armenia hero photography
+- tour collections, category filters, tour details, and visual itineraries
+- destination collections/details and fleet catalog
+- airport transfer and private-driver live estimates
+- reorderable custom-trip builder with route and price estimates
+- mobile-first three-stage guest booking flow
+- booking confirmation and secure public booking-status page
+- About, Contact/WhatsApp, FAQ, responsive navigation, and route metadata

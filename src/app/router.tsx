@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { OperationsLayout } from '@/components/layout/OperationsLayout'
@@ -6,9 +7,22 @@ import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { OperationsPage } from '@/pages/OperationsPage'
-import { PlaceholderPage } from '@/pages/PlaceholderPage'
 
-const page = (title: string, description?: string) => <PlaceholderPage title={title} {...(description ? { description } : {})} />
+const ToursPage = lazy(() => import('@/pages/catalog/ToursPage').then((module) => ({ default: module.ToursPage })))
+const TourDetailsPage = lazy(() => import('@/pages/catalog/TourDetailsPage').then((module) => ({ default: module.TourDetailsPage })))
+const DestinationsPage = lazy(() => import('@/pages/catalog/DestinationsPage').then((module) => ({ default: module.DestinationsPage })))
+const DestinationDetailsPage = lazy(() => import('@/pages/catalog/DestinationDetailsPage').then((module) => ({ default: module.DestinationDetailsPage })))
+const CarsPage = lazy(() => import('@/pages/catalog/CarsPage').then((module) => ({ default: module.CarsPage })))
+const ServiceEstimatorPage = lazy(() => import('@/pages/services/ServiceEstimatorPage').then((module) => ({ default: module.ServiceEstimatorPage })))
+const CustomTripPage = lazy(() => import('@/pages/services/CustomTripPage').then((module) => ({ default: module.CustomTripPage })))
+const BookingPage = lazy(() => import('@/pages/booking/BookingPage').then((module) => ({ default: module.BookingPage })))
+const BookingConfirmationPage = lazy(() => import('@/pages/booking/BookingConfirmationPage').then((module) => ({ default: module.BookingConfirmationPage })))
+const BookingStatusPage = lazy(() => import('@/pages/booking/BookingStatusPage').then((module) => ({ default: module.BookingStatusPage })))
+const contentPages = () => import('@/pages/content/ContentPages')
+const AboutPage = lazy(() => contentPages().then((module) => ({ default: module.AboutPage })))
+const ContactPage = lazy(() => contentPages().then((module) => ({ default: module.ContactPage })))
+const FaqPage = lazy(() => contentPages().then((module) => ({ default: module.FaqPage })))
+
 const operation = (title: string) => <OperationsPage title={title} />
 
 export const router = createBrowserRouter([
@@ -17,21 +31,21 @@ export const router = createBrowserRouter([
     errorElement: <NotFoundPage />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'tours', element: page('Private Tours') },
-      { path: 'tours/category/:slug', element: page('Tour Collection') },
-      { path: 'tours/:slug', element: page('Tour Details') },
-      { path: 'destinations', element: page('Destinations') },
-      { path: 'destinations/:slug', element: page('Destination Details') },
-      { path: 'cars', element: page('Our Cars') },
-      { path: 'airport-transfer', element: page('Airport Transfer') },
-      { path: 'private-driver', element: page('Private Driver in Armenia') },
-      { path: 'build-your-trip', element: page('Build Your Trip') },
-      { path: 'booking', element: page('Book Your Armenia Adventure') },
-      { path: 'booking/confirmation', element: page('Booking Confirmed') },
-      { path: 'booking/:bookingNumber/:token', element: page('My Booking') },
-      { path: 'about', element: page('About Us') },
-      { path: 'contact', element: page('Contact') },
-      { path: 'faq', element: page('Frequently Asked Questions') },
+      { path: 'tours', element: <ToursPage /> },
+      { path: 'tours/category/:slug', element: <ToursPage /> },
+      { path: 'tours/:slug', element: <TourDetailsPage /> },
+      { path: 'destinations', element: <DestinationsPage /> },
+      { path: 'destinations/:slug', element: <DestinationDetailsPage /> },
+      { path: 'cars', element: <CarsPage /> },
+      { path: 'airport-transfer', element: <ServiceEstimatorPage type="airport_transfer" /> },
+      { path: 'private-driver', element: <ServiceEstimatorPage type="private_driver" /> },
+      { path: 'build-your-trip', element: <CustomTripPage /> },
+      { path: 'booking', element: <BookingPage /> },
+      { path: 'booking/confirmation', element: <BookingConfirmationPage /> },
+      { path: 'booking/:bookingNumber/:token', element: <BookingStatusPage /> },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'contact', element: <ContactPage /> },
+      { path: 'faq', element: <FaqPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
