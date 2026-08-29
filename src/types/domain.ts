@@ -2,6 +2,7 @@ export type Currency = 'EUR' | 'USD' | 'AMD'
 export type UserRole = 'admin' | 'manager' | 'driver' | 'customer'
 export type ServiceType = 'tour' | 'airport_transfer' | 'private_driver' | 'custom_trip'
 export type PricingType = 'per_car' | 'per_person' | 'fixed' | 'custom'
+export type TourFormat = 'private' | 'group'
 export type BookingStatus = 'pending' | 'confirmed' | 'assigned' | 'driver_on_the_way' | 'driver_arrived' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 export type DriverTripStatus = 'assigned' | 'on_the_way' | 'arrived' | 'passenger_picked_up' | 'trip_started' | 'completed'
 
@@ -45,6 +46,7 @@ export interface Tour {
   duration_minutes: number
   approximate_distance_km: number | null
   starting_price: { amount_minor: number; currency: Currency; pricing_type: PricingType }
+  format: TourFormat
   max_passengers: number | null
   pickup_available: boolean
   dropoff_available: boolean
@@ -54,7 +56,18 @@ export interface Tour {
   gallery: Media[]
   itinerary?: TourStop[]
   days?: Array<{ day_number: number; title: string | null; description: string | null; overnight_location: string | null }>
+  upcoming_departures?: GroupTourDeparture[]
   seo: SeoFields
+}
+
+export interface GroupTourDeparture {
+  id: number
+  starts_at: string
+  ends_at: string
+  meeting_point: string
+  capacity: number
+  remaining_seats: number
+  price_per_person: { amount_minor: number; currency: Currency }
 }
 
 export interface Car {
@@ -82,6 +95,11 @@ export interface RoutePoint { latitude: number; longitude: number; label?: strin
 export interface Estimate {
   service_type: ServiceType
   car: { id: number; name: string }
+  tour_format?: TourFormat
+  group_tour_departure_id?: number
+  starts_at?: string
+  meeting_point?: string
+  remaining_seats?: number
   passengers: number
   duration_minutes?: number
   estimated_distance_meters?: number

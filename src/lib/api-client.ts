@@ -11,6 +11,9 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   config.headers.set('Accept-Language', i18n.language)
+  if (import.meta.env.VITE_NGROK_SKIP_BROWSER_WARNING === 'true') {
+    config.headers.set('ngrok-skip-browser-warning', 'true')
+  }
   const token = authStorage.get()
   if (token) config.headers.set('Authorization', `Bearer ${token}`)
   return config

@@ -4,7 +4,7 @@ import type { ApiEnvelope, PaginatedResponse } from '@/types/api'
 import type { Car, Destination, Tour, TourCategory } from '@/types/domain'
 
 export interface CatalogFilters { page?: number; per_page?: number; featured?: boolean; search?: string }
-export interface TourFilters extends CatalogFilters { category?: string; passengers?: number; sort?: 'recommended' | 'price_asc' | 'price_desc' | 'duration_asc' }
+export interface TourFilters extends CatalogFilters { category?: string; format?: 'private' | 'group'; passengers?: number; sort?: 'recommended' | 'price_asc' | 'price_desc' | 'duration_asc' }
 export interface CarFilters extends Pick<CatalogFilters, 'page' | 'per_page'> { category?: Car['category']; passengers?: number; luggage?: number; child_seat?: boolean; sort?: 'recommended' | 'price_asc' | 'capacity_desc' }
 
 export const catalogKeys = {
