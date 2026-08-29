@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { ImagePlus, Pencil, Plus, Trash2 } from 'lucide-react'
 import { adminApi, type CarAdminInput, type DirectoryItem } from '@/features/admin/api'
 import { Button } from '@/components/ui/Button'
 import { toApiError } from '@/lib/api-client'
@@ -59,6 +59,11 @@ export function AdminCarsPage() {
     onSuccess: refresh,
     onError: (reason) => setError(toApiError(reason).message),
   })
+  const removeImage = useMutation({
+    mutationFn: adminApi.deleteMedia,
+    onSuccess: refresh,
+    onError: (reason) => setError(toApiError(reason).message),
+  })
 
   function field<K extends keyof CarForm>(key: K, value: CarForm[K]) { setForm((current) => ({ ...current, [key]: value })) }
   function add() { setEditing(null); setForm(emptyForm); setError(null); setOpen(true) }
@@ -87,7 +92,7 @@ export function AdminCarsPage() {
       <div className="mt-6 flex flex-wrap gap-5">{([['air_conditioning','Air conditioning'],['wifi','Wi-Fi'],['child_seat_available','Child seat'],['active','Active'],['available_for_booking','Available for assignment']] as const).map(([key,label]) => <label key={key} className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={form[key]} onChange={(event) => field(key, event.target.checked)} />{label}</label>)}</div>
       <Button type="submit" disabled={save.isPending} className="mt-7">{save.isPending ? 'Saving…' : 'Save car'}</Button>
     </form>}
-    <div className="mt-7 overflow-hidden rounded-2xl bg-white shadow-sm">{query.data?.data.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-5 border-b border-black/5 px-5 py-4"><div><p className="font-semibold">{item.brand} {item.model}</p><p className="mt-1 text-xs text-ink/45">{item.year} · {item.plate_number} · {item.category} · {item.passenger_capacity} passengers</p></div><div className="flex flex-wrap items-center gap-2"><label className="cursor-pointer rounded-full bg-black/5 px-3 py-1.5 text-xs font-bold text-ink/60">Cover image<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload.mutate({ id: item.id, file }) }} /></label><button onClick={() => edit(item)} className="grid size-9 place-items-center rounded-full bg-black/5" aria-label="Edit car"><Pencil className="size-4" /></button><button onClick={() => { if (window.confirm(`Remove ${item.brand} ${item.model}?`)) remove.mutate(item.id) }} className="grid size-9 place-items-center rounded-full bg-red-50 text-danger" aria-label="Remove car"><Trash2 className="size-4" /></button></div></div>)}</div>
+    <div className="mt-7 overflow-hidden rounded-2xl bg-white shadow-sm">{query.data?.data.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-5 border-b border-black/5 px-5 py-4"><div className="flex items-center gap-4">{item.cover_image ? <img src={item.cover_image.url} alt="" className="size-16 rounded-xl object-cover" /> : <div className="grid size-16 place-items-center rounded-xl bg-stone text-ink/30"><ImagePlus /></div>}<div><p className="font-semibold">{item.brand} {item.model}</p><p className="mt-1 text-xs text-ink/45">{item.year} · {item.plate_number} · {item.category} · {item.passenger_capacity} passengers</p></div></div><div className="flex flex-wrap items-center gap-2"><label className="cursor-pointer rounded-full bg-black/5 px-3 py-2 text-xs font-bold text-ink/60">{item.cover_image ? 'Change image' : 'Add image'}<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload.mutate({ id: item.id, file }); event.target.value = '' }} /></label>{item.cover_image && <button onClick={() => { if (window.confirm('Remove this car image?')) removeImage.mutate(item.cover_image!.id) }} className="rounded-full bg-red-50 px-3 py-2 text-xs font-bold text-danger">Remove image</button>}<button onClick={() => edit(item)} className="grid size-9 place-items-center rounded-full bg-black/5" aria-label="Edit car"><Pencil className="size-4" /></button><button onClick={() => { if (window.confirm(`Remove ${item.brand} ${item.model}?`)) remove.mutate(item.id) }} className="grid size-9 place-items-center rounded-full bg-red-50 text-danger" aria-label="Remove car"><Trash2 className="size-4" /></button></div></div>)}</div>
     <p className="mt-4 text-sm text-ink/45">{query.data?.total ?? 0} total cars</p>
   </div>
 }
