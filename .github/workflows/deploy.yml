@@ -1,0 +1,41 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy frontend
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            set -e
+
+            cd /home/ubuntu/armenia-tourism/armenia-tourism-fe
+
+            git fetch origin
+            git reset --hard origin/master
+
+            docker build \
+              --build-arg VITE_API_BASE_URL=https://api-tourism.cardismantler.cc/api/v1 \
+              -t armenia-tourism-fe .
+
+            docker rm -f armenia-tourism-frontend || true
+
+            docker run -d \
+              --name armenia-tourism-frontend \
+              --restart unless-stopped \
+              -p 127.0.0.1:8090:80 \
+              armenia-tourism-fe
+
+            docker image prune -f
