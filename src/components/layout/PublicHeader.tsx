@@ -9,7 +9,6 @@ import { LanguageSelector } from './LanguageSelector'
 
 const links = [
   ['/tours', 'nav.tours'], ['/destinations', 'nav.destinations'], ['/cars', 'nav.cars'],
-  ['/airport-transfer', 'nav.transfer'], ['/private-driver', 'nav.driver'],
 ] as const
 
 export function PublicHeader() {

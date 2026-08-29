@@ -11,6 +11,7 @@ import { AdminBookingsPage } from '@/pages/admin/AdminBookingsPage'
 import { AdminBookingDetailsPage } from '@/pages/admin/AdminBookingDetailsPage'
 import { AdminCalendarPage } from '@/pages/admin/AdminCalendarPage'
 import { AdminDirectoryPage } from '@/pages/admin/AdminDirectoryPage'
+import { AdminCarsPage } from '@/pages/admin/AdminCarsPage'
 import { AdminCmsPage, AdminSettingsPage } from '@/pages/admin/AdminCmsPage'
 import { DriverTripsPage } from '@/pages/driver/DriverTripsPage'
 import { DriverTripDetailsPage } from '@/pages/driver/DriverTripDetailsPage'
@@ -20,7 +21,6 @@ const TourDetailsPage = lazy(() => import('@/pages/catalog/TourDetailsPage').the
 const DestinationsPage = lazy(() => import('@/pages/catalog/DestinationsPage').then((module) => ({ default: module.DestinationsPage })))
 const DestinationDetailsPage = lazy(() => import('@/pages/catalog/DestinationDetailsPage').then((module) => ({ default: module.DestinationDetailsPage })))
 const CarsPage = lazy(() => import('@/pages/catalog/CarsPage').then((module) => ({ default: module.CarsPage })))
-const ServiceEstimatorPage = lazy(() => import('@/pages/services/ServiceEstimatorPage').then((module) => ({ default: module.ServiceEstimatorPage })))
 const CustomTripPage = lazy(() => import('@/pages/services/CustomTripPage').then((module) => ({ default: module.CustomTripPage })))
 const BookingPage = lazy(() => import('@/pages/booking/BookingPage').then((module) => ({ default: module.BookingPage })))
 const BookingConfirmationPage = lazy(() => import('@/pages/booking/BookingConfirmationPage').then((module) => ({ default: module.BookingConfirmationPage })))
@@ -42,8 +42,6 @@ export const router = createBrowserRouter([
       { path: 'destinations', element: <DestinationsPage /> },
       { path: 'destinations/:slug', element: <DestinationDetailsPage /> },
       { path: 'cars', element: <CarsPage /> },
-      { path: 'airport-transfer', element: <ServiceEstimatorPage type="airport_transfer" /> },
-      { path: 'private-driver', element: <ServiceEstimatorPage type="private_driver" /> },
       { path: 'build-your-trip', element: <CustomTripPage /> },
       { path: 'booking', element: <BookingPage /> },
       { path: 'booking/confirmation', element: <BookingConfirmationPage /> },
@@ -65,7 +63,7 @@ export const router = createBrowserRouter([
       { path: 'calendar', element: <AdminCalendarPage /> },
       { path: 'tours', element: <AdminDirectoryPage type="tours" /> },
       { path: 'destinations', element: <AdminDirectoryPage type="destinations" /> },
-      { path: 'cars', element: <AdminDirectoryPage type="cars" /> },
+      { path: 'cars', element: <AdminCarsPage /> },
       { path: 'drivers', element: <AdminDirectoryPage type="drivers" /> },
       { path: 'customers', element: <AdminCmsPage type="customers" /> },
       { path: 'reviews', element: <AdminCmsPage type="reviews" /> },
