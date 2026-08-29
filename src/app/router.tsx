@@ -15,6 +15,7 @@ import { AdminCarsPage } from '@/pages/admin/AdminCarsPage'
 import { AdminCmsPage, AdminSettingsPage } from '@/pages/admin/AdminCmsPage'
 import { DriverTripsPage } from '@/pages/driver/DriverTripsPage'
 import { DriverTripDetailsPage } from '@/pages/driver/DriverTripDetailsPage'
+import { TelegramConnectionPage } from '@/pages/TelegramConnectionPage'
 
 const ToursPage = lazy(() => import('@/pages/catalog/ToursPage').then((module) => ({ default: module.ToursPage })))
 const TourDetailsPage = lazy(() => import('@/pages/catalog/TourDetailsPage').then((module) => ({ default: module.TourDetailsPage })))
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
       { path: 'inquiries', element: <AdminCmsPage type="inquiries" /> },
       { path: 'settings', element: <AdminSettingsPage /> },
       { path: 'audit-logs', element: <AdminCmsPage type="audit-logs" /> },
+      { path: 'telegram', element: <TelegramConnectionPage /> },
     ],
   },
   {
@@ -80,6 +82,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DriverTripsPage /> },
       { path: 'trips/:id', element: <DriverTripDetailsPage /> },
+      { path: 'telegram', element: <TelegramConnectionPage /> },
     ],
   },
 ])

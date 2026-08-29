@@ -32,7 +32,7 @@ export const adminApi = {
   updateDirectory:async(type:DirectoryType,id:number,input:Partial<CarAdminInput>&{active?:boolean;featured?:boolean;available_for_booking?:boolean}):Promise<DirectoryItem>=>(await apiClient.patch<ApiEnvelope<DirectoryItem>>(`/admin/directory/${type}/${id}`,input)).data.data,
   createCar:async(input:CarAdminInput):Promise<DirectoryItem>=>(await apiClient.post<ApiEnvelope<DirectoryItem>>('/admin/directory/cars',input)).data.data,
   deleteCar:async(id:number):Promise<void>=>{await apiClient.delete(`/admin/directory/cars/${id}`)},
-  uploadMedia:async(type:DirectoryType,id:number,file:File,collection?:'cover'|'gallery'|'profile'):Promise<Media>=>{const form=new FormData();form.append('file',file);form.append('collection',collection??(type==='drivers'?'profile':'gallery'));return (await apiClient.post<ApiEnvelope<Media>>(`/admin/media/${type}/${id}`,form)).data.data},
+  uploadMedia:async(type:DirectoryType,id:number,file:File,collection?:'cover'|'gallery'|'profile'):Promise<Media>=>{const form=new FormData();form.append('file',file);form.append('collection',collection??(type==='drivers'?'profile':'cover'));return (await apiClient.post<ApiEnvelope<Media>>(`/admin/media/${type}/${id}`,form)).data.data},
   cms:async(type:CmsType):Promise<CmsResponse>=>(await apiClient.get<CmsResponse>(`/admin/${type}`)).data,
   updateReview:async(id:number,active:boolean):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/reviews/${id}`,{active})).data.data,
   updatePromo:async(id:number,active:boolean):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/promo-codes/${id}`,{active})).data.data,

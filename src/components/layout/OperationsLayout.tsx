@@ -1,14 +1,14 @@
-import { BookOpen, CalendarDays, CarFront, Gauge, History, LogOut, Mail, Map, MapPin, Mountain, Settings, Star, Tag, UsersRound } from 'lucide-react'
+import { BookOpen, CalendarDays, CarFront, Gauge, History, LogOut, Mail, Map, MapPin, MessageCircle, Mountain, Settings, Star, Tag, UsersRound } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '@/lib/cn'
 import { useAuth } from '@/features/auth/auth-context'
 
-const adminLinks = [['/admin', 'Dashboard', Gauge], ['/admin/bookings', 'Bookings', CalendarDays], ['/admin/calendar', 'Calendar', CalendarDays], ['/admin/tours', 'Tours', Map], ['/admin/destinations', 'Destinations', MapPin], ['/admin/cars', 'Cars', CarFront], ['/admin/drivers', 'Drivers', UsersRound], ['/admin/customers', 'Customers', UsersRound], ['/admin/reviews', 'Reviews', Star], ['/admin/promo-codes', 'Promo codes', Tag], ['/admin/faqs', 'FAQs', BookOpen], ['/admin/inquiries', 'Inquiries', Mail]] as const
+const adminLinks = [['/admin', 'Dashboard', Gauge], ['/admin/bookings', 'Bookings', CalendarDays], ['/admin/calendar', 'Calendar', CalendarDays], ['/admin/tours', 'Tours', Map], ['/admin/destinations', 'Destinations', MapPin], ['/admin/cars', 'Cars', CarFront], ['/admin/drivers', 'Drivers', UsersRound], ['/admin/customers', 'Customers', UsersRound], ['/admin/reviews', 'Reviews', Star], ['/admin/promo-codes', 'Promo codes', Tag], ['/admin/faqs', 'FAQs', BookOpen], ['/admin/inquiries', 'Inquiries', Mail], ['/admin/telegram', 'Telegram', MessageCircle]] as const
 const superAdminLinks = [['/admin/settings', 'Settings', Settings], ['/admin/audit-logs', 'Audit history', History]] as const
 
 export function OperationsLayout({ driver = false }: { driver?: boolean }) {
   const { user, logout } = useAuth()
-  const links = driver ? [['/driver', 'My trips', CalendarDays]] as const : user?.role==='admin' ? [...adminLinks,...superAdminLinks] : adminLinks
+  const links = driver ? [['/driver', 'My trips', CalendarDays], ['/driver/telegram', 'Telegram', MessageCircle]] as const : user?.role==='admin' ? [...adminLinks,...superAdminLinks] : adminLinks
   return <div className="min-h-screen bg-[#f4f5f2] lg:grid lg:grid-cols-[260px_1fr]">
     <aside className="border-b border-black/5 bg-ink p-5 text-white lg:min-h-screen lg:border-b-0">
       <div className="flex items-center gap-3 font-bold"><Mountain className="text-apricot-light" />Armenia Operations</div>
