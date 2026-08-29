@@ -10,7 +10,7 @@ import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
 import { AdminBookingsPage } from '@/pages/admin/AdminBookingsPage'
 import { AdminBookingDetailsPage } from '@/pages/admin/AdminBookingDetailsPage'
 import { AdminCalendarPage } from '@/pages/admin/AdminCalendarPage'
-import { AdminDirectoryPage } from '@/pages/admin/AdminDirectoryPage'
+import { AdminDriversPage } from '@/pages/admin/AdminDriversPage'
 import { AdminCarsPage } from '@/pages/admin/AdminCarsPage'
 import { AdminToursPage } from '@/pages/admin/AdminToursPage'
 import { AdminDestinationsPage } from '@/pages/admin/AdminDestinationsPage'
@@ -67,7 +67,7 @@ export const router = createBrowserRouter([
       { path: 'tours', element: <AdminToursPage /> },
       { path: 'destinations', element: <AdminDestinationsPage /> },
       { path: 'cars', element: <AdminCarsPage /> },
-      { path: 'drivers', element: <AdminDirectoryPage type="drivers" /> },
+      { path: 'drivers', element: <AdminDriversPage /> },
       { path: 'customers', element: <AdminCmsPage type="customers" /> },
       { path: 'reviews', element: <AdminCmsPage type="reviews" /> },
       { path: 'promo-codes', element: <AdminCmsPage type="promo-codes" /> },
