@@ -79,7 +79,7 @@ export function CarsPage() {
 
                     {car.features.wifi && (
                         <span className="flex items-center gap-2">
-                    <Wifi className="size-4 shrink-0" />
+                    <Wifi className="size-4  shrink-0" />
                     Wi-Fi
                   </span>
                     )}
