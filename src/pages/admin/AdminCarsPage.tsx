@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ImagePlus, Pencil, Plus, Trash2 } from 'lucide-react'
 import { adminApi, type CarAdminInput, type DirectoryItem } from '@/features/admin/api'
 import { Button } from '@/components/ui/Button'
+import { NumericInput } from '@/components/ui/NumericInput'
 import { toApiError } from '@/lib/api-client'
 
 type CarForm = Omit<CarAdminInput, 'base_price_minor' | 'price_per_km_minor' | 'price_per_hour_minor'> & {
@@ -102,5 +103,5 @@ function Text({ label, value, onChange, required = false }: { label: string; val
 }
 
 function NumberField({ label, value, onChange, min, step = '1', required = false }: { label: string; value: number; onChange: (value: number) => void; min: number; step?: string; required?: boolean }) {
-  return <label className="text-sm font-semibold">{label}<input type="number" value={value} onChange={(event) => onChange(Number(event.target.value))} min={min} step={step} required={required} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3" /></label>
+  return <label className="text-sm font-semibold">{label}<NumericInput value={value} onValueChange={(next) => { if (next !== null) onChange(next) }} min={min} decimal={step !== '1'} required={required} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3" /></label>
 }

@@ -1,4 +1,5 @@
 import type { CatalogLocale, LocalizedContent } from './admin-catalog-types'
+import { NumericInput } from '@/components/ui/NumericInput'
 
 export function TranslationFields({ noun, value, onChange }: { noun: 'Tour title' | 'Destination name'; value: LocalizedContent[]; onChange: (value: LocalizedContent[]) => void }) {
   function field(locale: CatalogLocale, key: keyof Omit<LocalizedContent, 'locale'>, nextValue: string) {
@@ -29,7 +30,7 @@ export function TextArea({ label, value, onChange, rows = 3 }: { label:string; v
 }
 
 export function NumberField({ label, value, onChange, min, max, step = '1', required = false }: { label:string; value:number|null; onChange:(value:number|null)=>void; min?:number; max?:number; step?:string; required?:boolean }) {
-  return <label className="text-sm font-semibold">{label}<input type="number" value={value ?? ''} onChange={(event) => onChange(event.target.value === '' ? null : Number(event.target.value))} min={min} max={max} step={step} required={required} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3" /></label>
+  return <label className="text-sm font-semibold">{label}<NumericInput value={value} onValueChange={onChange} min={min} max={max} decimal={step !== '1'} allowNegative={(min ?? 0) < 0} required={required} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3" /></label>
 }
 
 export function Checkbox({ label, checked, onChange }: { label:string; checked:boolean; onChange:(value:boolean)=>void }) {

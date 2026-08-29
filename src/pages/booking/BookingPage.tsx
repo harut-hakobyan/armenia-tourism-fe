@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
+import { NumericInput } from '@/components/ui/NumericInput'
 import { carsQuery, toursQuery } from '@/features/catalog/api'
 import { bookingApi } from '@/features/bookings/api'
 import { bookingDraft } from '@/features/bookings/draft'
@@ -90,7 +91,7 @@ export function BookingPage() {
         {form.service==='tour'&&<label className="text-sm font-semibold sm:col-span-2">Tour<select value={form.tour} onChange={e=>chooseTour(Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="0">Choose a tour</option>{tours.data?.data.filter(t=>t.format === (group ? 'group' : 'private')).map(t=><option key={t.id} value={t.id}>{t.title}</option>)}</select></label>}
         {form.service==='tour'&&group&&<label className="text-sm font-semibold sm:col-span-2">Scheduled departure<select value={form.departure} onChange={e=>update('departure',Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="0">Choose a departure</option>{selectedTour?.upcoming_departures?.filter(d=>d.remaining_seats>0).map(d=><option key={d.id} value={d.id}>{new Intl.DateTimeFormat('en',{dateStyle:'medium',timeStyle:'short'}).format(new Date(d.starts_at))} · {d.remaining_seats} seats left</option>)}</select></label>}
         {!group&&<><label className="text-sm font-semibold">Date<input type="date" min={today} value={form.date} onChange={e=>update('date',e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label><label className="text-sm font-semibold">Pickup time<input type="time" value={form.time} onChange={e=>update('time',e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label></>}
-        <label className="text-sm font-semibold">{group ? 'Seats' : 'Passengers'}<input type="number" min="1" max={group ? selectedDeparture?.remaining_seats ?? 7 : 7} value={form.passengers} onChange={e=>update('passengers',Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label>
+        <label className="text-sm font-semibold">{group ? 'Seats' : 'Passengers'}<NumericInput required min={1} max={group ? selectedDeparture?.remaining_seats ?? 7 : 7} value={form.passengers} onValueChange={(value)=>{if(value!==null)update('passengers',value)}} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label>
         {!group&&<div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2"><strong>Transport:</strong> A suitable vehicle will be assigned based on your group size.</div>}
         {group&&selectedDeparture&&<div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2"><strong>Meeting point:</strong> {selectedDeparture.meeting_point}</div>}
         <Button onClick={()=>setStep(2)} disabled={!journeyReady} className="sm:col-span-2">Continue</Button></div>}

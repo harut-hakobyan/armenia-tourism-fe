@@ -4,16 +4,61 @@ import { useNavigate } from 'react-router-dom'
 import { Check, Clock3, Plane } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { Button } from '@/components/ui/Button'
+import { NumericInput } from '@/components/ui/NumericInput'
 import { carsQuery } from '@/features/catalog/api'
 import { estimateApi } from '@/features/estimates/api'
 import { bookingDraft } from '@/features/bookings/draft'
 import { formatMoney } from '@/lib/money'
 import { toApiError } from '@/lib/api-client'
 
-const airport=[{latitude:40.1473,longitude:44.3959,label:'Zvartnots Airport'},{latitude:40.1776,longitude:44.5126,label:'Yerevan'}]
+const airport = [
+  { latitude: 40.1473, longitude: 44.3959, label: 'Zvartnots Airport' },
+  { latitude: 40.1776, longitude: 44.5126, label: 'Yerevan' },
+]
 
-export function ServiceEstimatorPage({type}:{type:'airport_transfer'|'private_driver'}){
- const cars=useQuery(carsQuery({per_page:30}));const navigate=useNavigate();const [error,setError]=useState<string|null>(null);const [address,setAddress]=useState('');const estimate=useMutation({mutationFn:async(input:{car:number;passengers:number;duration:number})=>type==='airport_transfer'?estimateApi.transfer({car_id:input.car,passengers:input.passengers,extra_waiting_minutes:0,route_points:airport}):estimateApi.privateDriver({car_id:input.car,passengers:input.passengers,duration_minutes:input.duration})});
- async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();setError(null);const data=new FormData(event.currentTarget);const input={car:Number(data.get('car')),passengers:Number(data.get('passengers')),duration:Number(data.get('duration')??480)};try{await estimate.mutateAsync(input)}catch(reason){setError(toApiError(reason).message)}}
- function continueBooking(){if(!estimate.data)return;bookingDraft.set(type==='airport_transfer'?{service_type:type,car_id:estimate.data.car.id,route_points:airport,dropoff_address:address,estimate:estimate.data,service_options:{airport_pickup_sign:false}}:{service_type:type,car_id:estimate.data.car.id,duration_minutes:estimate.data.duration_minutes??480,estimate:estimate.data});void navigate(`/booking?service=${type}`)}
- const transfer=type==='airport_transfer';return <><section className="bg-ink py-20 text-white"><Container><div className="max-w-3xl"><span className="grid size-14 place-items-center rounded-2xl bg-apricot">{transfer?<Plane/>:<Clock3/>}</span><h1 className="text-display mt-6 text-5xl sm:text-7xl">{transfer?'Zvartnots Airport Transfer':'Private Driver in Armenia'}</h1><p className="mt-5 text-lg text-white/65">{transfer?'A calm arrival with flight-aware pickup, a private car, and direct hotel drop-off.':'Keep a professional local driver and comfortable car with you for the day.'}</p></div></Container></section><Container className="grid gap-10 py-16 lg:grid-cols-[1fr_380px]"><div><h2 className="text-display text-4xl">Simple, private, reliable</h2><div className="mt-8 grid gap-5 sm:grid-cols-3">{['Private vehicle','Professional local driver','Transparent total price'].map(item=><div className="rounded-2xl bg-stone p-5" key={item}><Check className="text-apricot"/><p className="mt-3 font-semibold">{item}</p></div>)}</div></div><form onSubmit={(event)=>void submit(event)} className="rounded-3xl bg-white p-6 shadow-soft"><h2 className="text-xl font-bold">Get your price</h2><label className="mt-5 block text-sm font-semibold">Passengers<input name="passengers" type="number" min="1" max="7" defaultValue="2" required className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label>{!transfer&&<label className="mt-4 block text-sm font-semibold">Package<select name="duration" className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="240">4 hours</option><option value="480">8 hours</option><option value="720">12 hours</option><option value="1440">Full day</option></select></label>}{transfer&&<label className="mt-4 block text-sm font-semibold">Destination address<input name="address" value={address} onChange={event=>setAddress(event.target.value)} required placeholder="Hotel or apartment in Yerevan" className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label>}<label className="mt-4 block text-sm font-semibold">Car<select name="car" required className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="">Choose a car</option>{cars.data?.data.map(car=><option value={car.id} key={car.id}>{car.name} · {car.passenger_capacity} guests</option>)}</select></label>{error&&<p className="mt-4 text-sm text-danger">{error}</p>}<Button type="submit" disabled={estimate.isPending} className="mt-6 w-full">{estimate.isPending?'Calculating...':'Calculate price'}</Button>{estimate.data&&<div className="mt-5 rounded-2xl bg-stone p-5"><div className="flex items-center justify-between"><span className="text-sm text-ink/55">Total for the car</span><strong className="text-2xl text-forest">{formatMoney(estimate.data.price.total_minor,estimate.data.price.currency)}</strong></div><Button onClick={continueBooking} className="mt-4 w-full">Continue booking</Button></div>}</form></Container></>}
+export function ServiceEstimatorPage({ type }: { type: 'airport_transfer' | 'private_driver' }) {
+  const cars = useQuery(carsQuery({ per_page: 30 }))
+  const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
+  const [address, setAddress] = useState('')
+  const [passengers, setPassengers] = useState(2)
+  const estimate = useMutation({
+    mutationFn: async (input: { car:number; passengers:number; duration:number }) => type === 'airport_transfer'
+      ? estimateApi.transfer({ car_id: input.car, passengers: input.passengers, extra_waiting_minutes: 0, route_points: airport })
+      : estimateApi.privateDriver({ car_id: input.car, passengers: input.passengers, duration_minutes: input.duration }),
+  })
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
+    const data = new FormData(event.currentTarget)
+    const input = { car: Number(data.get('car')), passengers, duration: Number(data.get('duration') ?? 480) }
+    try { await estimate.mutateAsync(input) } catch (reason) { setError(toApiError(reason).message) }
+  }
+
+  function continueBooking() {
+    if (!estimate.data) return
+    bookingDraft.set(type === 'airport_transfer'
+      ? { service_type: type, car_id: estimate.data.car.id, route_points: airport, dropoff_address: address, estimate: estimate.data, service_options: { airport_pickup_sign: false } }
+      : { service_type: type, car_id: estimate.data.car.id, duration_minutes: estimate.data.duration_minutes ?? 480, estimate: estimate.data })
+    void navigate(`/booking?service=${type}`)
+  }
+
+  const transfer = type === 'airport_transfer'
+  return <>
+    <section className="bg-ink py-20 text-white"><Container><div className="max-w-3xl"><span className="grid size-14 place-items-center rounded-2xl bg-apricot">{transfer ? <Plane /> : <Clock3 />}</span><h1 className="text-display mt-6 text-5xl sm:text-7xl">{transfer ? 'Zvartnots Airport Transfer' : 'Private Driver in Armenia'}</h1><p className="mt-5 text-lg text-white/65">{transfer ? 'A calm arrival with flight-aware pickup, a private car, and direct hotel drop-off.' : 'Keep a professional local driver and comfortable car with you for the day.'}</p></div></Container></section>
+    <Container className="grid gap-10 py-16 lg:grid-cols-[1fr_380px]">
+      <div><h2 className="text-display text-4xl">Simple, private, reliable</h2><div className="mt-8 grid gap-5 sm:grid-cols-3">{['Private vehicle', 'Professional local driver', 'Transparent total price'].map((item) => <div className="rounded-2xl bg-stone p-5" key={item}><Check className="text-apricot" /><p className="mt-3 font-semibold">{item}</p></div>)}</div></div>
+      <form onSubmit={(event) => void submit(event)} className="rounded-3xl bg-white p-6 shadow-soft">
+        <h2 className="text-xl font-bold">Get your price</h2>
+        <label className="mt-5 block text-sm font-semibold">Passengers<NumericInput required min={1} max={7} value={passengers} onValueChange={(value) => { if (value !== null) setPassengers(value) }} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4" /></label>
+        {!transfer && <label className="mt-4 block text-sm font-semibold">Package<select name="duration" className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="240">4 hours</option><option value="480">8 hours</option><option value="720">12 hours</option><option value="1440">Full day</option></select></label>}
+        {transfer && <label className="mt-4 block text-sm font-semibold">Destination address<input name="address" value={address} onChange={(event) => setAddress(event.target.value)} required placeholder="Hotel or apartment in Yerevan" className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4" /></label>}
+        <label className="mt-4 block text-sm font-semibold">Car<select name="car" required className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="">Choose a car</option>{cars.data?.data.map((car) => <option value={car.id} key={car.id}>{car.name} · {car.passenger_capacity} guests</option>)}</select></label>
+        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
+        <Button type="submit" disabled={estimate.isPending} className="mt-6 w-full">{estimate.isPending ? 'Calculating...' : 'Calculate price'}</Button>
+        {estimate.data && <div className="mt-5 rounded-2xl bg-stone p-5"><div className="flex items-center justify-between"><span className="text-sm text-ink/55">Total for the car</span><strong className="text-2xl text-forest">{formatMoney(estimate.data.price.total_minor, estimate.data.price.currency)}</strong></div><Button onClick={continueBooking} className="mt-4 w-full">Continue booking</Button></div>}
+      </form>
+    </Container>
+  </>
+}
