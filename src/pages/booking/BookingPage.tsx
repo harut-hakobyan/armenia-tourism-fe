@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import { CalendarDays, Check, Clock3 } from 'lucide-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
@@ -90,7 +90,20 @@ export function BookingPage() {
       {step===1&&<div className="grid gap-5 sm:grid-cols-2"><label className="text-sm font-semibold sm:col-span-2">Service<select value={effectiveBookingChoice} disabled={serviceLocked} onChange={e=>chooseService(e.target.value as BookingChoice)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4 disabled:cursor-not-allowed disabled:bg-stone disabled:text-ink/55"><option value="group_tour">Group tour</option><option value="private_tour">Private tour</option><option value="custom_trip">Custom trip</option></select></label>
         {form.service==='tour'&&<label className="text-sm font-semibold sm:col-span-2">Tour<select value={form.tour} onChange={e=>chooseTour(Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="0">Choose a tour</option>{tours.data?.data.filter(t=>t.format === (group ? 'group' : 'private')).map(t=><option key={t.id} value={t.id}>{t.title}</option>)}</select></label>}
         {form.service==='tour'&&group&&<label className="text-sm font-semibold sm:col-span-2">Scheduled departure<select value={form.departure} onChange={e=>update('departure',Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="0">Choose a departure</option>{selectedTour?.upcoming_departures?.filter(d=>d.remaining_seats>0).map(d=><option key={d.id} value={d.id}>{new Intl.DateTimeFormat('en',{dateStyle:'medium',timeStyle:'short'}).format(new Date(d.starts_at))} · {d.remaining_seats} seats left</option>)}</select></label>}
-        {!group&&<><label className="text-sm font-semibold">Date<input type="date" min={today} value={form.date} onChange={e=>update('date',e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label><label className="text-sm font-semibold">Pickup time<input type="time" value={form.time} onChange={e=>update('time',e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label></>}
+        {!group&&<>
+          <label className="min-w-0 text-sm font-semibold">Date
+            <span className="group mt-2 flex h-12 w-full items-center rounded-xl border border-black/10 bg-white px-4 shadow-[0_1px_2px_rgb(23_35_29/0.04)] transition hover:border-forest/35 focus-within:border-forest-light focus-within:ring-4 focus-within:ring-forest-light/10">
+              <CalendarDays aria-hidden="true" className="mr-3 size-5 shrink-0 text-forest/55 transition group-focus-within:text-forest" />
+              <input aria-label="Date" type="date" min={today} value={form.date} onChange={e=>update('date',e.target.value)} className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 font-medium text-ink outline-none [color-scheme:light] focus-visible:outline-none"/>
+            </span>
+          </label>
+          <label className="min-w-0 text-sm font-semibold">Pickup time
+            <span className="group mt-2 flex h-12 w-full items-center rounded-xl border border-black/10 bg-white px-4 shadow-[0_1px_2px_rgb(23_35_29/0.04)] transition hover:border-forest/35 focus-within:border-forest-light focus-within:ring-4 focus-within:ring-forest-light/10">
+              <Clock3 aria-hidden="true" className="mr-3 size-5 shrink-0 text-forest/55 transition group-focus-within:text-forest" />
+              <input aria-label="Pickup time" type="time" value={form.time} onChange={e=>update('time',e.target.value)} className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 font-medium text-ink outline-none [color-scheme:light] focus-visible:outline-none"/>
+            </span>
+          </label>
+        </>}
         <label className="text-sm font-semibold">{group ? 'Seats' : 'Passengers'}<NumericInput required min={1} max={group ? selectedDeparture?.remaining_seats ?? 7 : 7} value={form.passengers} onValueChange={(value)=>{if(value!==null)update('passengers',value)}} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label>
         {!group&&<div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2"><strong>Transport:</strong> A suitable vehicle will be assigned based on your group size.</div>}
         {group&&selectedDeparture&&<div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2"><strong>Meeting point:</strong> {selectedDeparture.meeting_point}</div>}
