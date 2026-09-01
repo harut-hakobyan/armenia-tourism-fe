@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import { CalendarDays, Check, ChevronRight, Clock3 } from 'lucide-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
@@ -85,12 +85,25 @@ export function BookingPage() {
   }
 
   const labels=['Journey','Pickup & contact','Review']
-  return <Container className="py-12 sm:py-20"><div className="mx-auto max-w-4xl"><p className="text-sm font-bold uppercase tracking-[.2em] text-apricot">Book securely</p><h1 className="text-display mt-2 text-5xl">Your Armenia journey</h1><div className="mt-8 grid grid-cols-3 gap-2">{labels.map((label,index)=><div key={label} className={`rounded-xl px-3 py-3 text-center text-xs font-bold ${step>=index+1?'bg-forest text-white':'bg-stone text-ink/40'}`}>{step>index+1?<Check className="mx-auto size-4"/>:label}</div>)}</div>
+  return <Container className="py-12 sm:py-20"><div className="mx-auto max-w-4xl"><p className="text-sm font-bold uppercase tracking-[.2em] text-apricot">Book securely</p><h1 className="text-display mt-2 text-5xl">Your Armenia journey</h1><div aria-label={`Booking progress: step ${step} of ${labels.length}`} className="mt-8 flex items-center rounded-2xl border border-black/6 bg-white p-2 shadow-[0_10px_35px_rgb(23_35_29/0.06)] sm:p-3">{labels.map((label,index)=>{const number=index+1;const complete=step>number;const active=step===number;return <div key={label} className="contents"><div aria-current={active?'step':undefined} className={`flex min-w-0 flex-1 items-center gap-2 rounded-xl px-2 py-2.5 transition sm:gap-3 sm:px-4 ${active?'bg-forest text-white shadow-md shadow-forest/15':complete?'text-forest':'text-ink/40'}`}><span className={`grid size-7 shrink-0 place-items-center rounded-full text-xs font-extrabold sm:size-8 ${active?'bg-white text-forest':complete?'bg-forest text-white':'bg-stone text-ink/45'}`}>{complete?<Check className="size-4"/>:number}</span><span className="truncate text-xs font-bold sm:text-sm">{label}</span></div>{index<labels.length-1&&<ChevronRight aria-hidden="true" className={`mx-0.5 size-4 shrink-0 sm:mx-2 sm:size-5 ${complete?'text-forest':'text-ink/20'}`}/>}</div>})}</div>
     <div className="mt-8 rounded-3xl bg-white p-6 shadow-soft sm:p-8">
       {step===1&&<div className="grid gap-5 sm:grid-cols-2"><label className="text-sm font-semibold sm:col-span-2">Service<select value={effectiveBookingChoice} disabled={serviceLocked} onChange={e=>chooseService(e.target.value as BookingChoice)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4 disabled:cursor-not-allowed disabled:bg-stone disabled:text-ink/55"><option value="group_tour">Group tour</option><option value="private_tour">Private tour</option><option value="custom_trip">Custom trip</option></select></label>
         {form.service==='tour'&&<label className="text-sm font-semibold sm:col-span-2">Tour<select value={form.tour} onChange={e=>chooseTour(Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="0">Choose a tour</option>{tours.data?.data.filter(t=>t.format === (group ? 'group' : 'private')).map(t=><option key={t.id} value={t.id}>{t.title}</option>)}</select></label>}
         {form.service==='tour'&&group&&<label className="text-sm font-semibold sm:col-span-2">Scheduled departure<select value={form.departure} onChange={e=>update('departure',Number(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"><option value="0">Choose a departure</option>{selectedTour?.upcoming_departures?.filter(d=>d.remaining_seats>0).map(d=><option key={d.id} value={d.id}>{new Intl.DateTimeFormat('en',{dateStyle:'medium',timeStyle:'short'}).format(new Date(d.starts_at))} · {d.remaining_seats} seats left</option>)}</select></label>}
-        {!group&&<><label className="text-sm font-semibold">Date<input type="date" min={today} value={form.date} onChange={e=>update('date',e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label><label className="text-sm font-semibold">Pickup time<input type="time" value={form.time} onChange={e=>update('time',e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label></>}
+        {!group&&<>
+          <label className="min-w-0 text-sm font-semibold">Date
+            <span className="group mt-2 flex h-12 w-full items-center rounded-xl border border-black/10 bg-white px-4 shadow-[0_1px_2px_rgb(23_35_29/0.04)] transition hover:border-forest/35 focus-within:border-forest-light focus-within:ring-4 focus-within:ring-forest-light/10">
+              <CalendarDays aria-hidden="true" className="mr-3 size-5 shrink-0 text-forest/55 transition group-focus-within:text-forest" />
+              <input aria-label="Date" type="date" min={today} value={form.date} onChange={e=>update('date',e.target.value)} className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 font-medium text-ink outline-none [color-scheme:light] focus-visible:outline-none"/>
+            </span>
+          </label>
+          <label className="min-w-0 text-sm font-semibold">Pickup time
+            <span className="group mt-2 flex h-12 w-full items-center rounded-xl border border-black/10 bg-white px-4 shadow-[0_1px_2px_rgb(23_35_29/0.04)] transition hover:border-forest/35 focus-within:border-forest-light focus-within:ring-4 focus-within:ring-forest-light/10">
+              <Clock3 aria-hidden="true" className="mr-3 size-5 shrink-0 text-forest/55 transition group-focus-within:text-forest" />
+              <input aria-label="Pickup time" type="time" value={form.time} onChange={e=>update('time',e.target.value)} className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 font-medium text-ink outline-none [color-scheme:light] focus-visible:outline-none"/>
+            </span>
+          </label>
+        </>}
         <label className="text-sm font-semibold">{group ? 'Seats' : 'Passengers'}<NumericInput required min={1} max={group ? selectedDeparture?.remaining_seats ?? 7 : 7} value={form.passengers} onValueChange={(value)=>{if(value!==null)update('passengers',value)}} className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"/></label>
         {!group&&<div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2"><strong>Transport:</strong> A suitable vehicle will be assigned based on your group size.</div>}
         {group&&selectedDeparture&&<div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2"><strong>Meeting point:</strong> {selectedDeparture.meeting_point}</div>}
