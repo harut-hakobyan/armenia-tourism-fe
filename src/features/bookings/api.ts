@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client'
 import type { ApiEnvelope } from '@/types/api'
-import type { CreatedBooking, Booking, RoutePoint, ServiceType } from '@/types/domain'
+import type { CreatedBooking, PublicBooking, RoutePoint, ServiceType } from '@/types/domain'
 
 export interface CreateBookingInput {
   idempotency_key: string
@@ -33,6 +33,6 @@ export interface CreateBookingInput {
 export const bookingApi = {
   create: async (input: CreateBookingInput): Promise<CreatedBooking> =>
     (await apiClient.post<ApiEnvelope<CreatedBooking>>('/bookings', input)).data.data,
-  findPublic: async (bookingNumber: string, token: string): Promise<Booking> =>
-    (await apiClient.get<ApiEnvelope<Booking>>(`/bookings/${bookingNumber}/${token}`)).data.data,
+  findPublic: async (bookingNumber: string, token: string): Promise<PublicBooking> =>
+    (await apiClient.get<ApiEnvelope<PublicBooking>>(`/bookings/${bookingNumber}/${token}`)).data.data,
 }

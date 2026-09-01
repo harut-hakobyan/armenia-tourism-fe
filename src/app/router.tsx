@@ -18,15 +18,16 @@ import { AdminCmsPage, AdminSettingsPage } from '@/pages/admin/AdminCmsPage'
 import { DriverTripsPage } from '@/pages/driver/DriverTripsPage'
 import { DriverTripDetailsPage } from '@/pages/driver/DriverTripDetailsPage'
 import { TelegramConnectionPage } from '@/pages/TelegramConnectionPage'
+import { BookingConfirmationPage } from '@/pages/booking/BookingConfirmationPage'
 
 const ToursPage = lazy(() => import('@/pages/catalog/ToursPage').then((module) => ({ default: module.ToursPage })))
 const TourDetailsPage = lazy(() => import('@/pages/catalog/TourDetailsPage').then((module) => ({ default: module.TourDetailsPage })))
+const CheckInPage = lazy(() => import('@/pages/CheckInPage').then((module) => ({ default: module.CheckInPage })))
 const DestinationsPage = lazy(() => import('@/pages/catalog/DestinationsPage').then((module) => ({ default: module.DestinationsPage })))
 const DestinationDetailsPage = lazy(() => import('@/pages/catalog/DestinationDetailsPage').then((module) => ({ default: module.DestinationDetailsPage })))
 const CarsPage = lazy(() => import('@/pages/catalog/CarsPage').then((module) => ({ default: module.CarsPage })))
 const CustomTripPage = lazy(() => import('@/pages/services/CustomTripPage').then((module) => ({ default: module.CustomTripPage })))
 const BookingPage = lazy(() => import('@/pages/booking/BookingPage').then((module) => ({ default: module.BookingPage })))
-const BookingConfirmationPage = lazy(() => import('@/pages/booking/BookingConfirmationPage').then((module) => ({ default: module.BookingConfirmationPage })))
 const BookingStatusPage = lazy(() => import('@/pages/booking/BookingStatusPage').then((module) => ({ default: module.BookingStatusPage })))
 const contentPages = () => import('@/pages/content/ContentPages')
 const AboutPage = lazy(() => contentPages().then((module) => ({ default: module.AboutPage })))
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <AdminSettingsPage /> },
       { path: 'audit-logs', element: <AdminCmsPage type="audit-logs" /> },
       { path: 'telegram', element: <TelegramConnectionPage /> },
+      { path: 'check-in', element: <CheckInPage /> },
     ],
   },
   {
@@ -85,6 +87,7 @@ export const router = createBrowserRouter([
       { index: true, element: <DriverTripsPage /> },
       { path: 'trips/:id', element: <DriverTripDetailsPage /> },
       { path: 'telegram', element: <TelegramConnectionPage /> },
+      { path: 'check-in', element: <CheckInPage /> },
     ],
   },
 ])

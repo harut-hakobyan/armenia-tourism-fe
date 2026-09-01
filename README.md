@@ -55,6 +55,7 @@ Authentication uses a Sanctum bearer token stored in browser storage. Resource a
 - reorderable custom-trip builder with route and price estimates
 - mobile-first three-stage guest booking flow
 - booking confirmation and secure public booking-status page
+- downloadable customer QR arrival ticket on confirmation and secure booking pages
 - API-backed About, contact inquiry/WhatsApp, multilingual FAQ, responsive navigation, and route metadata
 
 ## Implemented operations experience
@@ -63,6 +64,9 @@ Authentication uses a Sanctum bearer token stored in browser storage. Resource a
 - active-state directories for tours, destinations, cars, and drivers with validated image upload
 - customers, review moderation, promo codes, FAQs, contact inquiries, website settings, and audit history
 - mobile-first driver trip list, customer contact actions, and controlled status progression
+- role-authorized QR check-in scanner for admins/managers and assigned drivers, with manual entry fallback and partial-party attendance
+
+The camera scanner is available at `/admin/check-in` and `/driver/check-in`. Browser camera access requires HTTPS in production; manual ticket entry remains available when permission or camera hardware is unavailable.
 
 ## Production image
 
