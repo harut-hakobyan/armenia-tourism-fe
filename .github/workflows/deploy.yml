@@ -4,20 +4,25 @@ on:
   push:
     branches:
       - master
+      - staging
+
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-production:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Deploy frontend
+      - name: Deploy frontend to production
         uses: appleboy/ssh-action@v1.2.5
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
+          command_timeout: 10m
           script: |
             set -e
 
@@ -27,15 +32,51 @@ jobs:
             git reset --hard origin/master
 
             docker build \
-              --build-arg VITE_API_BASE_URL=https://api-tourism.cardismantler.cc/api/v1 \
-              -t armenia-tourism-fe .
+              --build-arg VITE_API_BASE_URL=https://api.tour-armenia.com/api/v1 \
+              -t armenia-tourism-fe:production .
 
-            docker rm -f armenia-tourism-frontend || true
+            docker rm -f armenia-tourism-frontend 2>/dev/null || true
 
             docker run -d \
               --name armenia-tourism-frontend \
               --restart unless-stopped \
               -p 127.0.0.1:8090:80 \
-              armenia-tourism-fe
+              armenia-tourism-fe:production
+
+            docker image prune -f
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Deploy frontend to staging
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USERNAME }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_PORT }}
+          command_timeout: 10m
+          script: |
+            set -e
+
+            cd /home/ubuntu/armenia-tourism/armenia-tourism-fe
+
+            git fetch origin
+            git reset --hard origin/staging
+
+            docker build \
+              --build-arg VITE_API_BASE_URL=https://api-tourism.cardismantler.cc/api/v1 \
+              -t armenia-tourism-fe:staging .
+
+            docker rm -f armenia-tourism-frontend 2>/dev/null || true
+
+            docker run -d \
+              --name armenia-tourism-frontend \
+              --restart unless-stopped \
+              -p 127.0.0.1:8090:80 \
+              armenia-tourism-fe:staging
 
             docker image prune -f
