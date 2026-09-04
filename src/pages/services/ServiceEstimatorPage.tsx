@@ -39,8 +39,8 @@ export function ServiceEstimatorPage({ type }: { type: 'airport_transfer' | 'pri
   function continueBooking() {
     if (!estimate.data) return
     bookingDraft.set(type === 'airport_transfer'
-      ? { service_type: type, car_id: estimate.data.car.id, route_points: airport, dropoff_address: address, estimate: estimate.data, service_options: { airport_pickup_sign: false } }
-      : { service_type: type, car_id: estimate.data.car.id, duration_minutes: estimate.data.duration_minutes ?? 480, estimate: estimate.data })
+      ? { service_type: type, passengers, car_id: estimate.data.car.id, route_points: airport, dropoff_address: address, estimate: estimate.data, service_options: { airport_pickup_sign: false } }
+      : { service_type: type, passengers, car_id: estimate.data.car.id, duration_minutes: estimate.data.duration_minutes ?? 480, estimate: estimate.data })
     void navigate(`/booking?service=${type}`)
   }
 
