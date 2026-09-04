@@ -3,7 +3,7 @@ export const resources = {
     translation: {
       brand: 'Armenia Journeys',
       nav: { tours: 'Group Tours', destinations: 'Destinations', cars: 'Our Cars', transfer: 'Airport Transfer', driver: 'Private Driver' },
-      actions: { book: 'Book Now', explore: 'Explore Tours', exploreGroup: 'Explore Group Tours', viewPrivate: 'View private tours', build: 'Build Your Trip', contact: 'Contact us' },
+      actions: { book: 'Book Now', explore: 'Explore Tours', exploreGroup: 'Explore Group Tours', groupTours: 'Group Tours', individualTours: 'Individual Tours', viewPrivate: 'View private tours', build: 'Build Your Trip', contact: 'Contact us' },
       home: {
         eyebrow: 'Small-group adventures across Armenia',
         title: 'Discover Armenia Together',
@@ -19,7 +19,7 @@ export const resources = {
     translation: {
       brand: 'Путешествия по Армении',
       nav: { tours: 'Групповые туры', destinations: 'Направления', cars: 'Наши автомобили', transfer: 'Трансфер из аэропорта', driver: 'Личный водитель' },
-      actions: { book: 'Забронировать', explore: 'Смотреть туры', exploreGroup: 'Групповые туры', viewPrivate: 'Смотреть частные туры', build: 'Создать маршрут', contact: 'Связаться' },
+      actions: { book: 'Забронировать', explore: 'Смотреть туры', exploreGroup: 'Групповые туры', groupTours: 'Групповые туры', individualTours: 'Индивидуальные туры', viewPrivate: 'Смотреть частные туры', build: 'Создать маршрут', contact: 'Связаться' },
       home: {
         eyebrow: 'Групповые путешествия по Армении',
         title: 'Откройте Армению вместе',
@@ -35,7 +35,7 @@ export const resources = {
     translation: {
       brand: 'Ճանապարհորդություններ Հայաստանում',
       nav: { tours: 'Խմբային տուրեր', destinations: 'Ուղղություններ', cars: 'Մեր մեքենաները', transfer: 'Օդանավակայանի տրանսֆեր', driver: 'Անձնական վարորդ' },
-      actions: { book: 'Ամրագրել', explore: 'Դիտել տուրերը', exploreGroup: 'Դիտել խմբային տուրերը', viewPrivate: 'Դիտել մասնավոր տուրերը', build: 'Կազմել ուղևորություն', contact: 'Կապվել' },
+      actions: { book: 'Ամրագրել', explore: 'Դիտել տուրերը', exploreGroup: 'Դիտել խմբային տուրերը', groupTours: 'Խմբային տուրեր', individualTours: 'Անհատական տուրեր', viewPrivate: 'Դիտել մասնավոր տուրերը', build: 'Կազմել ուղևորություն', contact: 'Կապվել' },
       home: {
         eyebrow: 'Խմբային արկածներ Հայաստանում',
         title: 'Բացահայտեք Հայաստանը միասին',
