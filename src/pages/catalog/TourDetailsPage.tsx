@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Check, Clock3, MapPin, Route, UsersRound } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
@@ -8,6 +9,30 @@ import { QueryError } from '@/components/ui/QueryState'
 import { buttonStyles } from '@/components/ui/button-styles'
 import { tourQuery } from '@/features/catalog/api'
 import { formatMoney } from '@/lib/money'
+import type { Tour } from '@/types/domain'
+
+function TourHeroMedia({ item }: { item: Tour }) {
+  const [videoFailed, setVideoFailed] = useState(false)
+  const image = <img src={item.cover_image?.url ?? '/images/armenia-garni-hero.png'} alt={item.cover_image?.alt_text ?? item.title} className="absolute inset-0 size-full object-cover" />
+
+  if (!item.video || videoFailed) return image
+
+  return <>
+    {image}
+    <video
+      key={item.video.id}
+      src={item.video.url}
+      poster={item.cover_image?.url}
+      autoPlay
+      muted
+      loop
+      playsInline
+      aria-hidden="true"
+      onError={() => setVideoFailed(true)}
+      className="absolute inset-0 size-full object-cover"
+    />
+  </>
+}
 
 function TourDescription({ description }: { description: string | null }) {
   if (!description) return null
@@ -35,7 +60,7 @@ export function TourDetailsPage() {
 
   return <>
     <section className="relative min-h-[520px] overflow-hidden bg-ink text-white">
-      <img src={item.cover_image?.url ?? '/images/armenia-garni-hero.png'} alt={item.cover_image?.alt_text ?? item.title} className="absolute inset-0 size-full object-cover" />
+      <TourHeroMedia key={item.id} item={item} />
       <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
       <Container className="relative flex min-h-[520px] items-end py-16">
         <div className="max-w-3xl">
