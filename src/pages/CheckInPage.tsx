@@ -44,10 +44,12 @@ export function CheckInPage() {
     setScanning(true)
     decoding.current = false
     try {
+      const preview = video.current
+      if (!preview) throw new Error('Camera preview is unavailable.')
       const reader = new BrowserQRCodeReader()
       controls.current = await reader.decodeFromConstraints(
         { video:{ facingMode:{ ideal:'environment' } }, audio:false },
-        video.current ?? undefined,
+        preview,
         (result, _error, scanner) => {
           if (!result || decoding.current) return
           decoding.current = true
@@ -80,7 +82,7 @@ export function CheckInPage() {
     <p className="text-sm font-semibold uppercase tracking-widest text-apricot">Attendance</p><h1 className="mt-2 text-3xl font-bold">QR check-in</h1><p className="mt-3 max-w-2xl text-ink/55">Scan the customer’s arrival ticket, verify the booking, then confirm how many passengers are present.</p>
 
     {!booking&&<div className="mt-7 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
-      <section className="overflow-hidden rounded-3xl bg-ink text-white shadow-xl"><div className="relative aspect-[4/3] bg-black/30">{scanning?<><video ref={video} muted playsInline className="h-full w-full object-cover"/><div className="pointer-events-none absolute inset-[15%] rounded-3xl border-2 border-white/80 shadow-[0_0_0_999px_rgb(0_0_0/.25)]"/></>:<div className="grid h-full place-items-center text-center"><div><QrCode className="mx-auto size-16 text-apricot-light"/><p className="mt-4 font-semibold">Ready to scan a ticket</p><p className="mt-2 text-sm text-white/50">Works best with the rear camera</p></div></div>}</div><div className="p-4">{scanning?<Button variant="secondary" onClick={stopCamera} className="w-full">Stop camera</Button>:<Button onClick={()=>void startCamera()} className="w-full"><Camera className="mr-2 size-4"/>Open camera</Button>}</div></section>
+      <section className="overflow-hidden rounded-3xl bg-ink text-white shadow-xl"><div className="relative aspect-[4/3] bg-black/30"><video ref={video} muted playsInline autoPlay className={`h-full w-full object-cover ${scanning?'block':'hidden'}`}/>{scanning?<div className="pointer-events-none absolute inset-[15%] rounded-3xl border-2 border-white/80 shadow-[0_0_0_999px_rgb(0_0_0/.25)]"/>:<div className="grid h-full place-items-center text-center"><div><QrCode className="mx-auto size-16 text-apricot-light"/><p className="mt-4 font-semibold">Ready to scan a ticket</p><p className="mt-2 text-sm text-white/50">Works best with the rear camera</p></div></div>}</div><div className="p-4">{scanning?<Button variant="secondary" onClick={stopCamera} className="w-full">Stop camera</Button>:<Button onClick={()=>void startCamera()} className="w-full"><Camera className="mr-2 size-4"/>Open camera</Button>}</div></section>
       <section className="rounded-3xl bg-white p-6 shadow-sm"><h2 className="font-bold">Enter code manually</h2><p className="mt-2 text-sm leading-6 text-ink/50">Use this if camera access is unavailable.</p><textarea value={manualToken} onChange={event=>setManualToken(event.target.value)} rows={4} placeholder="AMT-CHECKIN:..." className="mt-5 w-full resize-none rounded-2xl border border-black/10 p-4 font-mono text-sm outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"/><Button disabled={!manualToken.trim()||lookup.isPending} onClick={()=>void find(manualToken)} className="mt-4 w-full">{lookup.isPending?'Checking...':'Find booking'}</Button></section>
     </div>}
 
