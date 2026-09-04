@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client'
 import type { PaginatedResponse, ApiEnvelope } from '@/types/api'
-import type { AdminBooking, AssignmentAvailability, BookingStatus, Currency, DashboardStats, Media, PricingType, TourFormat } from '@/types/domain'
+import type { AdminBooking, AssignmentAvailability, BookingStatus, Currency, DashboardStats, Media, PricingType, Tour, TourFormat } from '@/types/domain'
 
 export interface AdminBookingFilters { page?: number; per_page?: number; booking_status?: BookingStatus; date_from?: string; date_to?: string; search?: string; car_id?: number; driver_id?: number }
 export type DirectoryType='tours'|'destinations'|'cars'|'drivers'
@@ -10,7 +10,7 @@ export interface DriverAdminInput { first_name:string; last_name:string; phone:s
 export interface DirectoryResponse { data:DirectoryItem[]; current_page:number; last_page:number; total:number }
 export interface AdminTranslation { locale:'en'|'ru'|'hy'; title?:string; name?:string; short_description:string|null; description:string|null; seo_title:string|null; seo_description:string|null }
 export interface TourAdminInput { category_id:number|null; slug:string; duration_minutes:number; approximate_distance_km:number|null; starting_price_minor:number; currency:Currency; pricing_type:PricingType; format:TourFormat; active:boolean; featured:boolean; max_passengers:number|null; pickup_available:boolean; dropoff_available:boolean; free_cancellation_hours:number; sort_order:number; translations:Array<AdminTranslation&{title:string}> }
-export interface AdminTour extends TourAdminInput { id:number; cover_image:Media|null }
+export interface AdminTour extends TourAdminInput { id:number; cover_image:Media|null; gallery?:Media[] }
 export interface DestinationAdminInput { slug:string; latitude:number|null; longitude:number|null; address:string|null; active:boolean; featured:boolean; sort_order:number; translations:Array<AdminTranslation&{name:string}> }
 export interface AdminDestination extends DestinationAdminInput { id:number; cover_image:Media|null }
 export interface AdminTourCategory { id:number; slug:string; active:boolean; translations:Array<{locale:string;name:string}> }
@@ -52,7 +52,9 @@ export const adminApi = {
   updateDestination:async(id:number,input:Partial<DestinationAdminInput>):Promise<AdminDestination>=>(await apiClient.patch<ApiEnvelope<AdminDestination>>(`/admin/directory/destinations/${id}`,input)).data.data,
   deleteDestination:async(id:number):Promise<void>=>{await apiClient.delete(`/admin/directory/destinations/${id}`)},
   tourCategories:async():Promise<AdminTourCategory[]>=>(await apiClient.get<ApiEnvelope<AdminTourCategory[]>>('/admin/directory/tour-categories')).data.data,
-  uploadMedia:async(type:DirectoryType,id:number,file:File,collection?:'cover'|'gallery'|'profile'):Promise<Media>=>{const form=new FormData();form.append('file',file);form.append('collection',collection??(type==='drivers'?'profile':'cover'));return (await apiClient.post<ApiEnvelope<Media>>(`/admin/media/${type}/${id}`,form)).data.data},
+  media:async(type:DirectoryType,id:number):Promise<Media[]>=>(await apiClient.get<ApiEnvelope<Media[]>>(`/admin/media/${type}/${id}`)).data.data,
+  tourMedia:async(id:number,slug:string):Promise<Media[]>=>{try{return (await apiClient.get<ApiEnvelope<Media[]>>(`/admin/media/tours/${id}`)).data.data}catch{const tour=(await apiClient.get<ApiEnvelope<Tour>>(`/tours/${slug}`,{params:{locale:'en'}})).data.data;const gallery=(tour.gallery??[]).map((image)=>({...image,collection:'gallery' as const}));return tour.cover_image&&!gallery.some((image)=>image.id===tour.cover_image?.id)?[{...tour.cover_image,collection:'cover' as const},...gallery]:gallery}},
+  uploadMedia:async(type:DirectoryType,id:number,file:File,collection?:'cover'|'gallery'|'profile',sortOrder?:number):Promise<Media>=>{const form=new FormData();form.append('file',file);form.append('collection',collection??(type==='drivers'?'profile':'cover'));if(sortOrder!==undefined)form.append('sort_order',String(sortOrder));return (await apiClient.post<ApiEnvelope<Media>>(`/admin/media/${type}/${id}`,form)).data.data},
   deleteMedia:async(id:number):Promise<void>=>{await apiClient.delete(`/admin/media/${id}`)},
   cms:async(type:CmsType):Promise<CmsResponse>=>(await apiClient.get<CmsResponse>(`/admin/${type}`)).data,
   updateReview:async(id:number,active:boolean):Promise<CmsItem>=>(await apiClient.patch<ApiEnvelope<CmsItem>>(`/admin/reviews/${id}`,{active})).data.data,
