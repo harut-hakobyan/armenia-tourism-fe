@@ -21,14 +21,16 @@ const emptyForm: CarForm = {
 }
 
 function fromItem(item: DirectoryItem): CarForm {
+  const currency: CarForm['currency'] = item.currency === 'USD' || item.currency === 'AMD' ? item.currency : 'EUR'
+
   return {
     brand: item.brand ?? '', model: item.model ?? '', year: item.year ?? new Date().getFullYear(),
     plate_number: item.plate_number ?? '', color: item.color ?? '', category: (item.category ?? 'comfort') as CarForm['category'],
     passenger_capacity: item.passenger_capacity ?? 4, luggage_capacity: item.luggage_capacity ?? 0,
     transmission: item.transmission ?? '', air_conditioning: item.air_conditioning ?? true,
     wifi: item.wifi ?? false, child_seat_available: item.child_seat_available ?? false,
-    base_price: fromMinorUnits(item.base_price_minor ?? 0, item.currency), price_per_km: fromMinorUnits(item.price_per_km_minor ?? 0, item.currency),
-    price_per_hour: fromMinorUnits(item.price_per_hour_minor ?? 0, item.currency), currency: item.currency,
+    base_price: fromMinorUnits(item.base_price_minor ?? 0, currency), price_per_km: fromMinorUnits(item.price_per_km_minor ?? 0, currency),
+    price_per_hour: fromMinorUnits(item.price_per_hour_minor ?? 0, currency), currency,
     active: item.active, available_for_booking: item.available_for_booking ?? true,
   }
 }
