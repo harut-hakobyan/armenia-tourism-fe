@@ -6,7 +6,7 @@ export type TourFormat = 'private' | 'group'
 export type BookingStatus = 'pending' | 'confirmed' | 'assigned' | 'driver_on_the_way' | 'driver_arrived' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 export type DriverTripStatus = 'assigned' | 'on_the_way' | 'arrived' | 'passenger_picked_up' | 'trip_started' | 'completed'
 
-export interface Media { id: number; uuid: string; url: string; alt_text: string | null; mime_type: string }
+export interface Media { id: number; uuid: string; collection?: 'cover' | 'gallery' | 'profile' | 'video'; url: string; alt_text: string | null; mime_type: string }
 export interface SeoFields { title: string | null; description: string | null }
 
 export interface Destination {
@@ -54,6 +54,7 @@ export interface Tour {
   featured: boolean
   cover_image: Media | null
   gallery: Media[]
+  video: Media | null
   itinerary?: TourStop[]
   days?: Array<{ day_number: number; title: string | null; description: string | null; overnight_location: string | null }>
   upcoming_departures?: GroupTourDeparture[]
@@ -124,6 +125,7 @@ export interface Booking {
   pickup: { address: string; latitude: string | null; longitude: string | null }
   dropoff: { address: string | null; latitude: string | null; longitude: string | null }
   passengers: number
+  attendance: { status: AttendanceStatus; checked_in_passengers: number; remaining_passengers: number; last_checked_in_at: string | null }
   customer: { name: string; email: string | null; phone: string; whatsapp: string | null; nationality: string | null }
   car: { id: number; name: string; category: string }
   driver: { name: string; phone: string } | null
@@ -132,7 +134,24 @@ export interface Booking {
   created_at: string
 }
 
-export interface CreatedBooking extends Booking { secure_token: string; public_url: string }
+export type AttendanceStatus = 'expected' | 'partially_checked_in' | 'checked_in'
+export interface CreatedBooking extends Booking { secure_token: string; public_url: string; qr_payload: string }
+export interface PublicBooking extends Booking { qr_payload: string }
+export interface CheckInBooking {
+  id: number
+  booking_number: string
+  service_type: ServiceType
+  booking_status: BookingStatus
+  tour: { id: number; title: string | null } | null
+  customer: { name: string; phone: string }
+  starts_at: string
+  pickup_address: string
+  passengers: number
+  car: { id: number; name: string } | null
+  driver: { id: number; name: string } | null
+  attendance: Booking['attendance']
+  check_ins: Array<{ id:number; passengers_checked_in:number; total_checked_in:number; checked_in_at:string; checked_in_by:{id:number;name:string;role:UserRole}|null }>
+}
 export interface AdminBooking extends Booking { id: number; customer_id: number | null; tour_id: number | null; car_id: number; driver_id: number | null; promo_code_id: number | null; admin_notes: string | null; updated_at: string }
 export interface DriverBooking extends Booking { id: number }
 export interface DashboardStats { counts: { today: number; upcoming: number; pending: number; completed: number }; revenue: { total_minor: number; month_minor: number; currency: Currency }; top_tours: Array<{ id: number; slug: string; bookings_count: number }>; top_cars: Array<{ id: number; name: string; bookings_count: number }> }
