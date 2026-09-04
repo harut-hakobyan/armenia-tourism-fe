@@ -5,6 +5,7 @@ import { adminApi, type CarAdminInput, type DirectoryItem } from '@/features/adm
 import { Button } from '@/components/ui/Button'
 import { NumericInput } from '@/components/ui/NumericInput'
 import { toApiError } from '@/lib/api-client'
+import { fromMinorUnits, toMinorUnits } from '@/lib/money'
 
 type CarForm = Omit<CarAdminInput, 'base_price_minor' | 'price_per_km_minor' | 'price_per_hour_minor'> & {
   base_price: number
@@ -20,14 +21,16 @@ const emptyForm: CarForm = {
 }
 
 function fromItem(item: DirectoryItem): CarForm {
+  const currency: CarForm['currency'] = item.currency === 'USD' || item.currency === 'AMD' ? item.currency : 'EUR'
+
   return {
     brand: item.brand ?? '', model: item.model ?? '', year: item.year ?? new Date().getFullYear(),
     plate_number: item.plate_number ?? '', color: item.color ?? '', category: (item.category ?? 'comfort') as CarForm['category'],
     passenger_capacity: item.passenger_capacity ?? 4, luggage_capacity: item.luggage_capacity ?? 0,
     transmission: item.transmission ?? '', air_conditioning: item.air_conditioning ?? true,
     wifi: item.wifi ?? false, child_seat_available: item.child_seat_available ?? false,
-    base_price: (item.base_price_minor ?? 0) / 100, price_per_km: (item.price_per_km_minor ?? 0) / 100,
-    price_per_hour: (item.price_per_hour_minor ?? 0) / 100, currency: (item.currency ?? 'EUR') as CarForm['currency'],
+    base_price: fromMinorUnits(item.base_price_minor ?? 0, currency), price_per_km: fromMinorUnits(item.price_per_km_minor ?? 0, currency),
+    price_per_hour: fromMinorUnits(item.price_per_hour_minor ?? 0, currency), currency,
     active: item.active, available_for_booking: item.available_for_booking ?? true,
   }
 }
@@ -35,9 +38,9 @@ function fromItem(item: DirectoryItem): CarForm {
 function payload(form: CarForm): CarAdminInput {
   return {
     ...form, color: form.color || null, transmission: form.transmission || null,
-    base_price_minor: Math.round(form.base_price * 100),
-    price_per_km_minor: Math.round(form.price_per_km * 100),
-    price_per_hour_minor: Math.round(form.price_per_hour * 100),
+    base_price_minor: toMinorUnits(form.base_price, form.currency),
+    price_per_km_minor: toMinorUnits(form.price_per_km, form.currency),
+    price_per_hour_minor: toMinorUnits(form.price_per_hour, form.currency),
   }
 }
 
@@ -85,9 +88,9 @@ export function AdminCarsPage() {
         <NumberField label="Passenger capacity" value={form.passenger_capacity} onChange={(value) => field('passenger_capacity', value)} min={1} required />
         <NumberField label="Luggage capacity" value={form.luggage_capacity} onChange={(value) => field('luggage_capacity', value)} min={0} required />
         <Text label="Transmission" value={form.transmission ?? ''} onChange={(value) => field('transmission', value)} />
-        <NumberField label={`Base price (${form.currency})`} value={form.base_price} onChange={(value) => field('base_price', value)} min={0} step="0.01" required />
-        <NumberField label={`Price / km (${form.currency})`} value={form.price_per_km} onChange={(value) => field('price_per_km', value)} min={0} step="0.01" required />
-        <NumberField label={`Price / hour (${form.currency})`} value={form.price_per_hour} onChange={(value) => field('price_per_hour', value)} min={0} step="0.01" required />
+        <NumberField label={`Base price (${form.currency})`} value={form.base_price} onChange={(value) => field('base_price', value)} min={0} step={form.currency === 'AMD' ? '1' : '0.01'} required />
+        <NumberField label={`Price / km (${form.currency})`} value={form.price_per_km} onChange={(value) => field('price_per_km', value)} min={0} step={form.currency === 'AMD' ? '1' : '0.01'} required />
+        <NumberField label={`Price / hour (${form.currency})`} value={form.price_per_hour} onChange={(value) => field('price_per_hour', value)} min={0} step={form.currency === 'AMD' ? '1' : '0.01'} required />
         <label className="text-sm font-semibold">Currency<select value={form.currency} onChange={(event) => field('currency', event.target.value as CarForm['currency'])} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3">{['EUR','USD','AMD'].map((currency) => <option key={currency}>{currency}</option>)}</select></label>
       </div>
       <div className="mt-6 flex flex-wrap gap-5">{([['air_conditioning','Air conditioning'],['wifi','Wi-Fi'],['child_seat_available','Child seat'],['active','Active'],['available_for_booking','Available for assignment']] as const).map(([key,label]) => <label key={key} className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={form[key]} onChange={(event) => field(key, event.target.checked)} />{label}</label>)}</div>
