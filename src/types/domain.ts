@@ -6,7 +6,7 @@ export type TourFormat = 'private' | 'group'
 export type BookingStatus = 'pending' | 'confirmed' | 'assigned' | 'driver_on_the_way' | 'driver_arrived' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 export type DriverTripStatus = 'assigned' | 'on_the_way' | 'arrived' | 'passenger_picked_up' | 'trip_started' | 'completed'
 
-export interface Media { id: number; uuid: string; collection?: 'cover' | 'gallery' | 'profile'; url: string; alt_text: string | null; mime_type: string }
+export interface Media { id: number; uuid: string; collection?: 'cover' | 'gallery' | 'profile' | 'video'; url: string; alt_text: string | null; mime_type: string }
 export interface SeoFields { title: string | null; description: string | null }
 
 export interface Destination {
@@ -54,6 +54,7 @@ export interface Tour {
   featured: boolean
   cover_image: Media | null
   gallery: Media[]
+  video: Media | null
   itinerary?: TourStop[]
   days?: Array<{ day_number: number; title: string | null; description: string | null; overnight_location: string | null }>
   upcoming_departures?: GroupTourDeparture[]
