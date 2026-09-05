@@ -47,6 +47,8 @@ export interface Tour {
   approximate_distance_km: number | null
   starting_price: { amount_minor: number; currency: Currency; pricing_type: PricingType }
   format: TourFormat
+  start_time: string | null
+  meeting_point: string | null
   max_passengers: number | null
   pickup_available: boolean
   dropoff_available: boolean
@@ -57,18 +59,7 @@ export interface Tour {
   video: Media | null
   itinerary?: TourStop[]
   days?: Array<{ day_number: number; title: string | null; description: string | null; overnight_location: string | null }>
-  upcoming_departures?: GroupTourDeparture[]
   seo: SeoFields
-}
-
-export interface GroupTourDeparture {
-  id: number
-  starts_at: string
-  ends_at: string
-  meeting_point: string
-  capacity: number
-  remaining_seats: number
-  price_per_person: { amount_minor: number; currency: Currency }
 }
 
 export interface Car {
@@ -97,10 +88,8 @@ export interface Estimate {
   service_type: ServiceType
   car: { id: number; name: string }
   tour_format?: TourFormat
-  group_tour_departure_id?: number
   starts_at?: string
   meeting_point?: string
-  remaining_seats?: number
   passengers: number
   duration_minutes?: number
   estimated_distance_meters?: number

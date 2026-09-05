@@ -1,4 +1,4 @@
-import { ArrowRight, CarFront, MapPinned, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CarFront, Crown, MapPinned, ShieldCheck } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -13,7 +13,7 @@ const promises = [
   { icon: ShieldCheck, label: 'Friendly small groups' },
   { icon: ShieldCheck, label: 'Private tours' },
   { icon: CarFront, label: 'Comfortable transport' },
-  { icon: MapPinned, label: 'Scheduled departures' },
+  { icon: MapPinned, label: 'Fixed group schedules' },
 ] as const
 
 export function HomePage() {
@@ -26,7 +26,7 @@ export function HomePage() {
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(16,28,22,.94)_0%,rgba(16,28,22,.78)_42%,rgba(16,28,22,.12)_78%)]" />
       <div className="absolute -right-20 top-16 -z-10 size-96 rounded-full border border-white/10" />
       <Container className="grid min-h-[650px] items-center py-24 lg:grid-cols-[1fr_0.7fr]">
-        <div className="max-w-3xl"><p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-apricot-light">{t('home.eyebrow')}</p><h1 className="text-display text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">{t('home.title')}</h1><p className="mt-7 text-lg text-white/75 sm:text-xl">{t('home.subtitle')}</p><div className="mt-9 flex flex-wrap gap-3"><Link to="/tours?format=group" className={buttonStyles()}>{t('actions.groupTours')}<ArrowRight className="ml-2 size-4" /></Link><Link to="/tours?format=private" className={cn(buttonStyles('secondary'), 'border-[#764a38] bg-[#764a38] text-white hover:border-[#653f30] hover:bg-[#653f30]')}>{t('actions.individualTours')}<ArrowRight className="ml-2 size-4" /></Link><Link to="/build-your-trip" className={cn(buttonStyles('secondary'), 'border-[#a9874c] bg-[#a9874c] text-white shadow-lg shadow-[#a9874c]/20 hover:-translate-y-0.5 hover:border-[#967641] hover:bg-[#967641]')}>{t('actions.build')}<ArrowRight className="ml-2 size-4" /></Link></div></div>
+        <div className="max-w-3xl"><p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-apricot-light">{t('home.eyebrow')}</p><h1 className="text-display text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">{t('home.title')}</h1><p className="mt-7 text-lg text-white/75 sm:text-xl">{t('home.subtitle')}</p><div className="mt-9 flex flex-wrap gap-3"><Link to="/tours?format=group" className={buttonStyles()}>{t('actions.groupTours')}<ArrowRight className="ml-2 size-4" /></Link><Link to="/tours?format=private" className={cn(buttonStyles('secondary'), 'border-[#764a38] bg-[#764a38] text-white hover:border-[#653f30] hover:bg-[#653f30]')}>{t('actions.individualTours')}<ArrowRight className="ml-2 size-4" /></Link><Link to="/tours?format=premium" className={cn(buttonStyles('secondary'), 'border-[#d8bc87] bg-[#171d1a]/80 text-[#f1dfb9] shadow-lg shadow-black/20 hover:-translate-y-0.5 hover:border-[#efd49d] hover:bg-[#171d1a]')}><Crown className="mr-2 size-4" />Premium Private Tours<ArrowRight className="ml-2 size-4" /></Link><Link to="/build-your-trip" className={cn(buttonStyles('secondary'), 'border-[#a9874c] bg-[#a9874c] text-white shadow-lg shadow-[#a9874c]/20 hover:-translate-y-0.5 hover:border-[#967641] hover:bg-[#967641]')}>{t('actions.build')}<ArrowRight className="ml-2 size-4" /></Link></div></div>
         <div className="mt-16 grid gap-3 sm:grid-cols-3 lg:mt-0 lg:grid-cols-1">{promises.map(({ icon: Icon, label }) => <div key={label} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/7 p-4 backdrop-blur"><Icon className="text-apricot-light" /><span className="font-semibold">{label}</span></div>)}</div>
       </Container>
     </section>
