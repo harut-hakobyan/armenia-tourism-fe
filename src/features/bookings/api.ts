@@ -7,7 +7,6 @@ export interface CreateBookingInput {
   service_type: ServiceType
   tour_id?: number
   car_id?: number
-  group_tour_departure_id?: number
   booking_date: string
   pickup_time: string
   passengers: number
