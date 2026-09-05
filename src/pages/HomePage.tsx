@@ -13,7 +13,7 @@ const promises = [
   { icon: ShieldCheck, label: 'Friendly small groups' },
   { icon: ShieldCheck, label: 'Private tours' },
   { icon: CarFront, label: 'Comfortable transport' },
-  { icon: MapPinned, label: 'Scheduled departures' },
+  { icon: MapPinned, label: 'Fixed group schedules' },
 ] as const
 
 export function HomePage() {

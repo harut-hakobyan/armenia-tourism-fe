@@ -98,12 +98,12 @@ export function TourDetailsPage() {
           <p className="text-sm text-ink/50">{group ? 'Group tour from' : 'Private tour from'}</p>
           <p className="mt-1 text-3xl font-bold text-forest">{formatMoney(item.starting_price.amount_minor, item.starting_price.currency, i18n.language)} <span className="text-sm font-normal text-ink/50">/ {group ? 'person' : 'car'}</span></p>
           {group ? <div className="mt-6">
-            <h2 className="font-bold">Upcoming departures</h2>
-            <div className="mt-3 space-y-3">{item.upcoming_departures?.length ? item.upcoming_departures.map((departure) => <div key={departure.id} className="rounded-2xl border border-black/8 p-4">
-              <p className="font-semibold">{new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(departure.starts_at))}</p>
-              <p className="mt-1 text-xs text-ink/55">{departure.remaining_seats} seats left · {departure.meeting_point}</p>
-              <Link to={`/booking?service=tour&tour=${item.id}&departure=${departure.id}`} className={`${buttonStyles()} mt-3 w-full`}>Reserve seats</Link>
-            </div>) : <p className="mt-3 text-sm text-ink/55">New departure dates will be announced soon.</p>}</div>
+            <h2 className="font-bold">Tour schedule</h2>
+            <div className="mt-3 space-y-3 rounded-2xl border border-black/8 p-4">
+              <p className="flex items-center gap-2 text-sm"><Clock3 className="size-4 text-apricot" /><strong>Start time:</strong> {item.start_time ?? 'To be confirmed'}</p>
+              <p className="flex items-start gap-2 text-sm"><MapPin className="mt-0.5 size-4 shrink-0 text-apricot" /><span><strong>Meeting place:</strong> {item.meeting_point ?? 'To be confirmed'}</span></p>
+            </div>
+            <Link to={`/booking?service=tour&tour=${item.id}`} className={`${buttonStyles()} mt-5 w-full`}>Book group tour</Link>
           </div> : <>
             <ul className="mt-6 space-y-3 text-sm text-ink/65">
               <li className="flex gap-2"><MapPin className="size-4 text-apricot" />Hotel pickup available</li>
