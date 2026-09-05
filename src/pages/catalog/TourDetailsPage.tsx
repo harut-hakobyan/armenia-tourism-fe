@@ -49,7 +49,7 @@ function TourDescription({ description }: { description: string | null }) {
 
 export function TourDetailsPage() {
   const { slug = '' } = useParams()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const tour = useQuery(tourQuery(i18n.language, slug))
 
   if (tour.isPending) return <PageLoader />
@@ -64,13 +64,13 @@ export function TourDetailsPage() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
       <Container className="relative flex min-h-[520px] items-end py-16">
         <div className="max-w-3xl">
-          <p className="text-sm font-bold uppercase tracking-[.2em] text-apricot-light">{item.category?.name} · {group ? 'Small-group tour' : 'Private tour'}</p>
+          <p className="text-sm font-bold uppercase tracking-[.2em] text-apricot-light">{item.category?.name} · {t(group ? 'tourDetails.smallGroupTour' : 'tourDetails.privateTour')}</p>
           <h1 className="text-display mt-3 text-5xl sm:text-7xl">{item.title}</h1>
           <p className="mt-5 max-w-2xl text-lg text-white/75">{item.short_description}</p>
           <div className="mt-7 flex flex-wrap gap-5 text-sm font-semibold">
-            <span className="flex gap-2"><Clock3 />{Math.round(item.duration_minutes / 60)} hours</span>
+            <span className="flex gap-2"><Clock3 />{Math.round(item.duration_minutes / 60)} {t('common.hours')}</span>
             <span className="flex gap-2"><Route />{item.approximate_distance_km} km</span>
-            <span className="flex gap-2">{group ? <UsersRound /> : <Check />}{group ? 'Shared small group' : 'Private car'}</span>
+            <span className="flex gap-2">{group ? <UsersRound /> : <Check />}{t(group ? 'tourDetails.sharedGroup' : 'tourDetails.privateCar')}</span>
           </div>
         </div>
       </Container>
@@ -78,38 +78,38 @@ export function TourDetailsPage() {
 
     <Container className="grid gap-12 py-16 lg:grid-cols-[1fr_380px]">
       <div>
-        <h2 className="text-display text-4xl">The journey</h2>
+        <h2 className="text-display text-4xl">{t('tourDetails.journey')}</h2>
         <TourDescription description={item.description} />
-        <h2 className="text-display mt-14 text-4xl">Itinerary</h2>
+        <h2 className="text-display mt-14 text-4xl">{t('tourDetails.itinerary')}</h2>
         <div className="mt-8 space-y-0">{item.itinerary?.map((stop, index) => <div className="relative flex gap-5 pb-8" key={`${stop.day_number}-${stop.stop_order}`}>
           <div className="flex flex-col items-center">
             <span className="grid size-10 place-items-center rounded-full bg-forest text-sm font-bold text-white">{index + 1}</span>
             {index < (item.itinerary?.length ?? 0) - 1 && <span className="h-full w-px bg-sand" />}
           </div>
           <div className="pt-2">
-            <h3 className="font-bold">{stop.destination?.name ?? 'Scenic stop'}</h3>
-            {stop.duration_minutes && <p className="mt-1 text-sm text-ink/50">About {stop.duration_minutes} minutes</p>}
+            <h3 className="font-bold">{stop.destination?.name ?? t('tourDetails.scenicStop')}</h3>
+            {stop.duration_minutes && <p className="mt-1 text-sm text-ink/50">{t('tourDetails.duration',{count:stop.duration_minutes})}</p>}
           </div>
         </div>)}</div>
       </div>
 
       <aside>
         <div className="sticky top-24 rounded-3xl bg-white p-6 shadow-soft">
-          <p className="text-sm text-ink/50">{group ? 'Group tour from' : 'Private tour from'}</p>
-          <p className="mt-1 text-3xl font-bold text-forest">{formatMoney(item.starting_price.amount_minor, item.starting_price.currency, i18n.language)} <span className="text-sm font-normal text-ink/50">/ {group ? 'person' : 'car'}</span></p>
+          <p className="text-sm text-ink/50">{t(group ? 'tourDetails.groupFrom' : 'tourDetails.privateFrom')}</p>
+          <p className="mt-1 text-3xl font-bold text-forest">{formatMoney(item.starting_price.amount_minor, item.starting_price.currency, i18n.language)} <span className="text-sm font-normal text-ink/50">/ {t(group ? 'common.person' : 'common.car')}</span></p>
           {group ? <div className="mt-6">
-            <h2 className="font-bold">Tour schedule</h2>
+            <h2 className="font-bold">{t('tourDetails.schedule')}</h2>
             <div className="mt-3 space-y-3 rounded-2xl border border-black/8 p-4">
-              <p className="flex items-center gap-2 text-sm"><Clock3 className="size-4 text-apricot" /><strong>Start time:</strong> {item.start_time ?? 'To be confirmed'}</p>
-              <p className="flex items-start gap-2 text-sm"><MapPin className="mt-0.5 size-4 shrink-0 text-apricot" /><span><strong>Meeting place:</strong> {item.meeting_point ?? 'To be confirmed'}</span></p>
+              <p className="flex items-center gap-2 text-sm"><Clock3 className="size-4 text-apricot" /><strong>{t('tourDetails.startTime')}</strong> {item.start_time ?? t('common.toBeConfirmed')}</p>
+              <p className="flex items-start gap-2 text-sm"><MapPin className="mt-0.5 size-4 shrink-0 text-apricot" /><span><strong>{t('tourDetails.meetingPlace')}</strong> {item.meeting_point ?? t('common.toBeConfirmed')}</span></p>
             </div>
-            <Link to={`/booking?service=tour&tour=${item.id}`} className={`${buttonStyles()} mt-5 w-full`}>Book group tour</Link>
+            <Link to={`/booking?service=tour&tour=${item.id}`} className={`${buttonStyles()} mt-5 w-full`}>{t('tourDetails.bookGroup')}</Link>
           </div> : <>
             <ul className="mt-6 space-y-3 text-sm text-ink/65">
-              <li className="flex gap-2"><MapPin className="size-4 text-apricot" />Hotel pickup available</li>
-              <li className="flex gap-2"><Check className="size-4 text-apricot" />Free cancellation up to {item.free_cancellation_hours}h</li>
+              <li className="flex gap-2"><MapPin className="size-4 text-apricot" />{t('tourDetails.hotelPickup')}</li>
+              <li className="flex gap-2"><Check className="size-4 text-apricot" />{t('tourDetails.freeCancellation',{count:item.free_cancellation_hours})}</li>
             </ul>
-            <Link to={`/booking?service=tour&tour=${item.id}`} className={`${buttonStyles()} mt-7 w-full`}>Choose date</Link>
+            <Link to={`/booking?service=tour&tour=${item.id}`} className={`${buttonStyles()} mt-7 w-full`}>{t('tourDetails.chooseDate')}</Link>
           </>}
         </div>
       </aside>
