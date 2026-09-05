@@ -1,24 +1,25 @@
 import { Briefcase, Check, Snowflake, Users, Wifi } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Container } from '@/components/ui/Container'
 import { carsQuery } from '@/features/catalog/api'
 
 export function CarsPage() {
+  const { t } = useTranslation()
   const cars = useQuery(carsQuery({ per_page: 30 }))
 
   return (
       <Container className="py-16 sm:py-24">
         <p className="text-sm font-bold uppercase tracking-[.2em] text-apricot">
-          Our fleet
+          {t('cars.eyebrow')}
         </p>
 
         <h1 className="text-display mt-3 text-5xl sm:text-6xl">
-          Comfort for every Armenian road
+          {t('cars.title')}
         </h1>
 
         <p className="mt-5 max-w-2xl text-lg text-ink/60">
-          Explore our maintained fleet. We assign the most suitable available
-          vehicle for your group size and route.
+          {t('cars.description')}
         </p>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -62,12 +63,12 @@ export function CarsPage() {
                   <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-ink/60">
                 <span className="flex items-center gap-2">
                   <Users className="size-4 shrink-0" />
-                  {car.passenger_capacity} guests
+                  {car.passenger_capacity} {t('common.guests')}
                 </span>
 
                     <span className="flex items-center gap-2">
                   <Briefcase className="size-4 shrink-0" />
-                      {car.luggage_capacity} bags
+                      {car.luggage_capacity} {t('common.bags')}
                 </span>
 
                     {car.features.air_conditioning && (
@@ -87,7 +88,7 @@ export function CarsPage() {
                     {car.features.child_seat_available && (
                         <span className="flex items-center gap-2">
                     <Check className="size-4 shrink-0" />
-                    Child seat
+                    {t('cars.childSeat')}
                   </span>
                     )}
                   </div>
