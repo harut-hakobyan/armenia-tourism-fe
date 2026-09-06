@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { MessageCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { CircleCheckBig, MessageCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Container } from "@/components/ui/Container";
 import { buttonStyles } from "@/components/ui/button-styles";
@@ -92,78 +92,91 @@ export function ContactPage() {
             {t("content.whatsapp")}
           </a>
         </div>
-        <form
-          className="mt-12 grid gap-4 rounded-3xl bg-white p-6 shadow-soft"
-          onSubmit={(event) => {
-            event.preventDefault();
-            contact.mutate(form);
-          }}
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <input
-              required
-              className="rounded-xl border border-black/10 px-4 py-3"
-              placeholder={t("content.name")}
-              value={form.name}
-              onChange={(event) =>
-                setForm({ ...form, name: event.target.value })
-              }
-            />
-            <input
-              required
-              type="email"
-              className="rounded-xl border border-black/10 px-4 py-3"
-              placeholder={t("content.email")}
-              value={form.email}
-              onChange={(event) =>
-                setForm({ ...form, email: event.target.value })
-              }
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <input
-              className="rounded-xl border border-black/10 px-4 py-3"
-              placeholder={t("content.phone")}
-              value={form.phone}
-              onChange={(event) =>
-                setForm({ ...form, phone: event.target.value })
-              }
-            />
-            <input
-              required
-              className="rounded-xl border border-black/10 px-4 py-3"
-              placeholder={t("content.subject")}
-              value={form.subject}
-              onChange={(event) =>
-                setForm({ ...form, subject: event.target.value })
-              }
-            />
-          </div>
-          <textarea
-            required
-            minLength={10}
-            rows={5}
-            className="rounded-xl border border-black/10 px-4 py-3"
-            placeholder={t("content.message")}
-            value={form.message}
-            onChange={(event) =>
-              setForm({ ...form, message: event.target.value })
-            }
-          />
-          <button className={buttonStyles()} disabled={contact.isPending}>
-            {contact.isPending ? t("content.sending") : t("content.send")}
-          </button>
-          {contact.isSuccess && (
-            <p className="text-sm font-semibold text-emerald-700">
+        {contact.isSuccess ? (
+          <section
+            className="mt-12 overflow-hidden rounded-3xl border border-emerald-700/10 bg-white px-6 py-12 text-center shadow-soft sm:px-12 sm:py-16"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="mx-auto grid size-20 place-items-center rounded-full bg-emerald-50 text-emerald-700 ring-8 ring-emerald-50/50">
+              <CircleCheckBig className="size-10" strokeWidth={1.8} />
+            </div>
+            <h2 className="mt-7 text-3xl font-bold text-ink">
+              {t("content.send")}
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-lg leading-8 text-ink/60">
               {t("content.sent")}
             </p>
-          )}
-          {contact.isError && (
-            <p className="text-sm font-semibold text-red-700">
-              {t("content.sendError")}
-            </p>
-          )}
-        </form>
+          </section>
+        ) : (
+          <form
+            className="mt-12 grid gap-4 rounded-3xl bg-white p-6 shadow-soft"
+            onSubmit={(event) => {
+              event.preventDefault();
+              contact.mutate(form);
+            }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <input
+                required
+                className="rounded-xl border border-black/10 px-4 py-3"
+                placeholder={t("content.name")}
+                value={form.name}
+                onChange={(event) =>
+                  setForm({ ...form, name: event.target.value })
+                }
+              />
+              <input
+                required
+                type="email"
+                className="rounded-xl border border-black/10 px-4 py-3"
+                placeholder={t("content.email")}
+                value={form.email}
+                onChange={(event) =>
+                  setForm({ ...form, email: event.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <input
+                className="rounded-xl border border-black/10 px-4 py-3"
+                placeholder={t("content.phone")}
+                value={form.phone}
+                onChange={(event) =>
+                  setForm({ ...form, phone: event.target.value })
+                }
+              />
+              <input
+                required
+                className="rounded-xl border border-black/10 px-4 py-3"
+                placeholder={t("content.subject")}
+                value={form.subject}
+                onChange={(event) =>
+                  setForm({ ...form, subject: event.target.value })
+                }
+              />
+            </div>
+            <textarea
+              required
+              minLength={10}
+              rows={5}
+              className="rounded-xl border border-black/10 px-4 py-3"
+              placeholder={t("content.message")}
+              value={form.message}
+              onChange={(event) =>
+                setForm({ ...form, message: event.target.value })
+              }
+            />
+            <button className={buttonStyles()} disabled={contact.isPending}>
+              {contact.isPending ? t("content.sending") : t("content.send")}
+            </button>
+            {contact.isError && (
+              <p className="text-sm font-semibold text-red-700">
+                {t("content.sendError")}
+              </p>
+            )}
+          </form>
+        )}
       </div>
     </Container>
   );
