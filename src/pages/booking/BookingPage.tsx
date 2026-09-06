@@ -68,6 +68,7 @@ export function BookingPage() {
     email: "",
     phone: "",
     whatsapp: "",
+    promoCode: draft?.promo_code ?? "",
     notes: "",
   });
   const tours = useQuery(toursQuery(i18n.language, { per_page: 50 }));
@@ -126,12 +127,15 @@ export function BookingPage() {
   const effectivePickup = group
     ? (selectedTour?.meeting_point ?? "")
     : form.pickup;
+  const normalizedPromoCode = form.promoCode.trim().toUpperCase();
+  const promoCodeLocked = Boolean(draft?.promo_code);
 
   const estimate = useMutation({
     mutationFn: () => {
       const contact = {
         passengers: effectivePassengers,
         ...(form.email ? { customer_email: form.email } : {}),
+        ...(normalizedPromoCode ? { promo_code: normalizedPromoCode } : {}),
       };
       if (form.service === "tour")
         return estimateApi.tour({
@@ -215,6 +219,7 @@ export function BookingPage() {
         customer_phone: form.phone,
         ...(form.whatsapp ? { customer_whatsapp: form.whatsapp } : {}),
         ...(form.notes ? { customer_notes: form.notes } : {}),
+        ...(normalizedPromoCode ? { promo_code: normalizedPromoCode } : {}),
         payment_method: "pay_driver",
         ...(routeService
           ? { route_points: draft?.route_points ?? defaultRoute }
@@ -517,6 +522,22 @@ export function BookingPage() {
                 />
               </label>
               <label className="text-sm font-semibold sm:col-span-2">
+                {t("booking.promoCode")}
+                <input
+                  value={form.promoCode}
+                  onChange={(e) => update("promoCode", e.target.value.toUpperCase())}
+                  placeholder={t("booking.promoPlaceholder")}
+                  autoComplete="off"
+                  disabled={promoCodeLocked}
+                  className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4 uppercase disabled:cursor-not-allowed disabled:bg-stone disabled:text-ink/55"
+                />
+                {promoCodeLocked && (
+                  <span className="mt-2 block text-xs font-normal text-emerald-700">
+                    {t("booking.promoApplied")}
+                  </span>
+                )}
+              </label>
+              <label className="text-sm font-semibold sm:col-span-2">
                 {t("booking.notes")}
                 <textarea
                   value={form.notes}
@@ -586,6 +607,16 @@ export function BookingPage() {
                   </dt>
                   <dd className="mt-1 font-semibold">{effectivePickup}</dd>
                 </div>
+                {estimate.data.price.promo_code && (
+                  <div>
+                    <dt className="text-xs uppercase text-ink/45">
+                      {t("booking.promoCode")}
+                    </dt>
+                    <dd className="mt-1 font-semibold text-forest">
+                      {estimate.data.price.promo_code}
+                    </dd>
+                  </div>
+                )}
               </dl>
               <div className="mt-6 flex items-end justify-between border-t border-black/8 pt-6">
                 <div>
@@ -598,6 +629,14 @@ export function BookingPage() {
                       estimate.data.price.currency,
                     )}
                   </p>
+                  {estimate.data.price.discount_minor > 0 && (
+                    <p className="mt-1 text-sm font-semibold text-emerald-700">
+                      {t("booking.discount")}: -{formatMoney(
+                        estimate.data.price.discount_minor,
+                        estimate.data.price.currency,
+                      )}
+                    </p>
+                  )}
                 </div>
                 <span className="rounded-full bg-stone px-3 py-1 text-xs font-bold">
                   {t("booking.payDriver")}
