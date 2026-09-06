@@ -9,6 +9,7 @@ describe('bookingDraft', () => {
       service_type: 'custom_trip',
       passengers: 4,
       car_id: 2,
+      promo_code: 'SAVE10',
       route_points: [
         { latitude: 40.18, longitude: 44.51, label: 'Yerevan' },
         { latitude: 40.11, longitude: 44.73, label: 'Garni' },
@@ -16,7 +17,7 @@ describe('bookingDraft', () => {
       service_options: { return_to_yerevan: true },
     })
 
-    expect(bookingDraft.get()).toMatchObject({ service_type: 'custom_trip', passengers: 4, car_id: 2 })
+    expect(bookingDraft.get()).toMatchObject({ service_type: 'custom_trip', passengers: 4, car_id: 2, promo_code: 'SAVE10' })
     expect(bookingDraft.get()?.route_points).toHaveLength(2)
   })
 

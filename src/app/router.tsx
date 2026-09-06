@@ -17,7 +17,10 @@ import {
   AdminTourFormPage,
   AdminToursPage,
 } from "@/pages/admin/AdminToursPage";
-import { AdminDestinationsPage } from "@/pages/admin/AdminDestinationsPage";
+import {
+  AdminDestinationFormPage,
+  AdminDestinationsPage,
+} from "@/pages/admin/AdminDestinationsPage";
 import { AdminCmsPage, AdminSettingsPage } from "@/pages/admin/AdminCmsPage";
 import { DriverTripsPage } from "@/pages/driver/DriverTripsPage";
 import { DriverTripDetailsPage } from "@/pages/driver/DriverTripDetailsPage";
@@ -119,6 +122,8 @@ export const router = createBrowserRouter([
       { path: "tours/new", element: <AdminTourFormPage /> },
       { path: "tours/:tourId/edit", element: <AdminTourFormPage /> },
       { path: "destinations", element: <AdminDestinationsPage /> },
+      { path: "destinations/new", element: <AdminDestinationFormPage /> },
+      { path: "destinations/:destinationId/edit", element: <AdminDestinationFormPage /> },
       { path: "cars", element: <AdminCarsPage /> },
       { path: "cars/type-prices", element: <AdminCarTypePricesPage /> },
       { path: "drivers", element: <AdminDriversPage /> },

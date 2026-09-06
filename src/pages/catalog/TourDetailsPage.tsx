@@ -9,6 +9,7 @@ import { QueryError } from "@/components/ui/QueryState";
 import { buttonStyles } from "@/components/ui/button-styles";
 import { TourGallerySlideshow } from "@/components/catalog/TourGallerySlideshow";
 import { carsQuery, tourQuery } from "@/features/catalog/api";
+import { bookingDraft } from "@/features/bookings/draft";
 import { carTypeCapacity, carTypes, isCarType } from "@/features/cars/types";
 import { formatMoney } from "@/lib/money";
 import type { Tour } from "@/types/domain";
@@ -76,6 +77,7 @@ export function TourDetailsPage() {
   const [selectedCarType, setSelectedCarType] = useState(
     isCarType(requestedType) ? requestedType : "sedan",
   );
+  const [promoCode, setPromoCode] = useState("");
   const { i18n, t } = useTranslation();
   const tour = useQuery(tourQuery(i18n.language, slug));
   const cars = useQuery(
@@ -104,6 +106,14 @@ export function TourDetailsPage() {
 
   const item = tour.data;
   const group = item.format === "group";
+  const rememberBookingDraft = () => {
+    const normalizedPromoCode = promoCode.trim().toUpperCase();
+    bookingDraft.set({
+      service_type: "tour",
+      tour_id: item.id,
+      ...(normalizedPromoCode ? { promo_code: normalizedPromoCode } : {}),
+    });
+  };
 
   return (
     <>
@@ -213,6 +223,16 @@ export function TourDetailsPage() {
                 / {t(group ? "common.person" : "common.car")}
               </span>
             </p>
+            <label className="mt-6 block text-sm font-semibold">
+              {t("booking.promoCode")}
+              <input
+                value={promoCode}
+                onChange={(event) => setPromoCode(event.target.value.toUpperCase())}
+                placeholder={t("booking.promoPlaceholder")}
+                autoComplete="off"
+                className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4 uppercase"
+              />
+            </label>
             {group ? (
               <div className="mt-6">
                 <h2 className="font-bold">{t("tourDetails.schedule")}</h2>
@@ -232,6 +252,7 @@ export function TourDetailsPage() {
                 </div>
                 <Link
                   to={`/booking?service=tour&tour=${item.id}`}
+                  onClick={rememberBookingDraft}
                   className={`${buttonStyles()} mt-5 w-full`}
                 >
                   {t("tourDetails.bookGroup")}
@@ -273,6 +294,7 @@ export function TourDetailsPage() {
                 </ul>
                 <Link
                   to={`/booking?service=tour&tour=${item.id}&type=${effectiveCarType}${premium ? "&vehicle=premium" : ""}`}
+                  onClick={rememberBookingDraft}
                   className={`${buttonStyles()} mt-7 w-full`}
                 >
                   {t("tourDetails.chooseDate")}

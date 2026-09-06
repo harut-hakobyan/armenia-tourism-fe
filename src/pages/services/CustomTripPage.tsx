@@ -10,6 +10,7 @@ import { carsQuery, destinationsQuery } from "@/features/catalog/api";
 import { estimateApi } from "@/features/estimates/api";
 import { selectBestVehicleType } from "@/features/estimates/vehicle-allocation";
 import { bookingDraft } from "@/features/bookings/draft";
+import { toApiError } from "@/lib/api-client";
 import { formatMoney } from "@/lib/money";
 import type { Destination, RoutePoint } from "@/types/domain";
 
@@ -30,6 +31,7 @@ export function CustomTripPage() {
   );
   const [selected, setSelected] = useState<Destination[]>([]);
   const [passengers, setPassengers] = useState(2);
+  const [promoCode, setPromoCode] = useState("");
   const [premiumCarId, setPremiumCarId] = useState(
     Number.isInteger(requestedPremiumCarId) ? requestedPremiumCarId : 0,
   );
@@ -66,6 +68,7 @@ export function CustomTripPage() {
         car_id: automaticCarId,
         passengers,
         route_points: points(),
+        ...(promoCode.trim() ? { promo_code: promoCode.trim().toUpperCase() } : {}),
         ...(premium ? { premium_class: true } : {}),
       }),
   });
@@ -87,6 +90,9 @@ export function CustomTripPage() {
       passengers,
       car_id: automaticCarId,
       route_points: estimate.data.route_points ?? points(),
+      ...(estimate.data.price.promo_code
+        ? { promo_code: estimate.data.price.promo_code }
+        : {}),
       estimate: estimate.data,
       service_options: {
         return_to_yerevan: true,
@@ -214,6 +220,19 @@ export function CustomTripPage() {
               className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"
             />
           </label>
+          <label className="mt-5 block text-sm font-semibold">
+            {t("booking.promoCode")}
+            <input
+              value={promoCode}
+              onChange={(event) => {
+                setPromoCode(event.target.value.toUpperCase());
+                estimate.reset();
+              }}
+              placeholder={t("booking.promoPlaceholder")}
+              autoComplete="off"
+              className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4 uppercase"
+            />
+          </label>
           {premiumCapacityExceeded && selectedCar && (
             <p className="mt-2 text-sm text-danger">
               {t("customTrip.passengerCapacityExceeded", {
@@ -249,6 +268,11 @@ export function CustomTripPage() {
           >
             {t("customTrip.calculate")}
           </Button>
+          {estimate.isError && (
+            <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-danger">
+              {toApiError(estimate.error).message}
+            </p>
+          )}
           {estimate.data && (
             <div className="mt-5 rounded-2xl bg-stone p-5">
               <p className="text-sm text-ink/55">
@@ -267,6 +291,15 @@ export function CustomTripPage() {
                   estimate.data.price.currency,
                 )}
               </p>
+              {estimate.data.price.discount_minor > 0 && (
+                <div className="mt-2 text-sm font-semibold text-emerald-700">
+                  <p>{t("booking.promoCode")}: {estimate.data.price.promo_code}</p>
+                  <p>{t("booking.discount")}: -{formatMoney(
+                    estimate.data.price.discount_minor,
+                    estimate.data.price.currency,
+                  )}</p>
+                </div>
+              )}
               <Button className="mt-4 w-full" onClick={continueBooking}>
                 {t("customTrip.continue")}
               </Button>
