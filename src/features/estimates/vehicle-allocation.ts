@@ -7,7 +7,7 @@ export function requiredVehicleCount(
   return Math.ceil(passengers / capacityPerVehicle);
 }
 
-export function selectBestVehicleCategory(
+export function selectBestVehicleType(
   cars: Car[],
   passengers: number,
 ): Car | undefined {

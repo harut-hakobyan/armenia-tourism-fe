@@ -4,6 +4,7 @@ export type ServiceType =
   "tour" | "airport_transfer" | "private_driver" | "custom_trip";
 export type PricingType = "per_car" | "per_person" | "fixed" | "custom";
 export type TourFormat = "private" | "group";
+export type CarType = "sedan" | "minivan" | "minibus" | "bus";
 export type BookingStatus =
   | "pending"
   | "confirmed"
@@ -118,6 +119,7 @@ export interface Car {
   color: string;
   category:
     "economy" | "comfort" | "business" | "suv" | "minivan" | "premium" | "bus";
+  type: CarType;
   passenger_capacity: number;
   luggage_capacity: number;
   transmission: string;
@@ -164,7 +166,7 @@ export interface RoutePoint {
 
 export interface Estimate {
   service_type: ServiceType;
-  car: { id: number; name: string };
+  car: { id: number; name: string; type: CarType };
   tour_format?: TourFormat;
   starts_at?: string;
   meeting_point?: string;
@@ -176,7 +178,7 @@ export interface Estimate {
   route_provider?: string;
   route_points?: RoutePoint[];
   vehicle_allocation?: {
-    category: Car["category"];
+    type: CarType;
     count: number;
     capacity_per_vehicle: number;
   };

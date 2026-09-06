@@ -29,7 +29,7 @@ const adminLinks = [
   ["/admin/tours", "Tours", Map],
   ["/admin/destinations", "Destinations", MapPin],
   ["/admin/cars", "Cars", CarFront],
-  ["/admin/cars/category-prices", "Category prices", CircleDollarSign],
+  ["/admin/cars/type-prices", "Vehicle type prices", CircleDollarSign],
   ["/admin/drivers", "Drivers", UsersRound],
   ["/admin/customers", "Customers", UsersRound],
   ["/admin/reviews", "Reviews", Star],

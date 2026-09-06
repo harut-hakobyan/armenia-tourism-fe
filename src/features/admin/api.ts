@@ -32,6 +32,7 @@ export interface DirectoryItem {
   plate_number?: string;
   color?: string | null;
   category?: string;
+  type?: CarType;
   passenger_capacity?: number;
   luggage_capacity?: number;
   transmission?: string | null;
@@ -65,6 +66,7 @@ export interface DirectoryItem {
 }
 export type CarCategory =
   "economy" | "comfort" | "business" | "suv" | "minivan" | "premium" | "bus";
+export type CarType = "sedan" | "minivan" | "minibus" | "bus";
 export interface CarAdminInput {
   brand: string;
   model: string;
@@ -72,7 +74,7 @@ export interface CarAdminInput {
   plate_number: string;
   color: string | null;
   category: CarCategory;
-  passenger_capacity: number;
+  type: CarType;
   luggage_capacity: number;
   transmission: string | null;
   air_conditioning: boolean;
@@ -81,8 +83,9 @@ export interface CarAdminInput {
   active: boolean;
   available_for_booking: boolean;
 }
-export interface CarCategoryPrice {
-  category: CarCategory;
+export interface CarTypePrice {
+  type: CarType;
+  passenger_capacity: number;
   fixed_price_minor: number;
   currency: Currency;
 }
@@ -304,19 +307,19 @@ export const adminApi = {
         input,
       )
     ).data.data,
-  carCategoryPrices: async (): Promise<CarCategoryPrice[]> =>
+  carTypePrices: async (): Promise<CarTypePrice[]> =>
     (
-      await apiClient.get<ApiEnvelope<CarCategoryPrice[]>>(
-        "/admin/directory/car-category-prices",
+      await apiClient.get<ApiEnvelope<CarTypePrice[]>>(
+        "/admin/directory/car-type-prices",
       )
     ).data.data,
-  updateCarCategoryPrice: async (
-    category: CarCategory,
-    input: Pick<CarCategoryPrice, "fixed_price_minor" | "currency">,
-  ): Promise<CarCategoryPrice> =>
+  updateCarTypePrice: async (
+    type: CarType,
+    input: Pick<CarTypePrice, "fixed_price_minor" | "currency">,
+  ): Promise<CarTypePrice> =>
     (
-      await apiClient.patch<ApiEnvelope<CarCategoryPrice>>(
-        `/admin/directory/car-category-prices/${category}`,
+      await apiClient.patch<ApiEnvelope<CarTypePrice>>(
+        `/admin/directory/car-type-prices/${type}`,
         input,
       )
     ).data.data,

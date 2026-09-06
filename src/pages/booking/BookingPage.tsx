@@ -10,7 +10,7 @@ import { carsQuery, toursQuery } from "@/features/catalog/api";
 import { bookingApi } from "@/features/bookings/api";
 import { bookingDraft } from "@/features/bookings/draft";
 import { estimateApi } from "@/features/estimates/api";
-import { selectBestVehicleCategory } from "@/features/estimates/vehicle-allocation";
+import { selectBestVehicleType } from "@/features/estimates/vehicle-allocation";
 import { formatMoney } from "@/lib/money";
 import { toApiError } from "@/lib/api-client";
 import type { ServiceType } from "@/types/domain";
@@ -95,7 +95,7 @@ export function BookingPage() {
   const effectivePassengers = form.passengers;
   const automaticCarId =
     cars.data?.data.find((car) => car.id === selectedCarId)?.id ??
-    selectBestVehicleCategory(cars.data?.data ?? [], form.passengers)?.id ??
+    selectBestVehicleType(cars.data?.data ?? [], form.passengers)?.id ??
     0;
   const selectedCar = cars.data?.data.find(
     (car) => car.id === automaticCarId,

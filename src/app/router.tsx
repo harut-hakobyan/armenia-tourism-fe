@@ -12,7 +12,7 @@ import { AdminBookingDetailsPage } from "@/pages/admin/AdminBookingDetailsPage";
 import { AdminCalendarPage } from "@/pages/admin/AdminCalendarPage";
 import { AdminDriversPage } from "@/pages/admin/AdminDriversPage";
 import { AdminCarsPage } from "@/pages/admin/AdminCarsPage";
-import { AdminCarCategoryPricesPage } from "@/pages/admin/AdminCarCategoryPricesPage";
+import { AdminCarTypePricesPage } from "@/pages/admin/AdminCarTypePricesPage";
 import {
   AdminTourFormPage,
   AdminToursPage,
@@ -120,7 +120,7 @@ export const router = createBrowserRouter([
       { path: "tours/:tourId/edit", element: <AdminTourFormPage /> },
       { path: "destinations", element: <AdminDestinationsPage /> },
       { path: "cars", element: <AdminCarsPage /> },
-      { path: "cars/category-prices", element: <AdminCarCategoryPricesPage /> },
+      { path: "cars/type-prices", element: <AdminCarTypePricesPage /> },
       { path: "drivers", element: <AdminDriversPage /> },
       { path: "customers", element: <AdminCmsPage type="customers" /> },
       { path: "reviews", element: <AdminCmsPage type="reviews" /> },
