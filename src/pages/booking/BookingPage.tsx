@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronRight, Clock3 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -10,6 +10,8 @@ import { carsQuery, toursQuery } from "@/features/catalog/api";
 import { bookingApi } from "@/features/bookings/api";
 import { bookingDraft } from "@/features/bookings/draft";
 import { estimateApi } from "@/features/estimates/api";
+import { selectBestVehicleType } from "@/features/estimates/vehicle-allocation";
+import { carTypeCapacity, carTypes, isCarType } from "@/features/cars/types";
 import { formatMoney } from "@/lib/money";
 import { toApiError } from "@/lib/api-client";
 import type { ServiceType } from "@/types/domain";
@@ -23,7 +25,7 @@ type BookingChoice = "group_tour" | "private_tour" | "custom_trip";
 
 function validPassengerCount(value: unknown): number {
   const count = Number(value);
-  return Number.isInteger(count) && count >= 1 && count <= 50 ? count : 1;
+  return Number.isInteger(count) && count >= 1 && count <= 255 ? count : 1;
 }
 
 export function BookingPage() {
@@ -31,6 +33,11 @@ export function BookingPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const draft = bookingDraft.get();
+  const premium = params.get("vehicle") === "premium";
+  const requestedCarType = params.get("type");
+  const [selectedCarType, setSelectedCarType] = useState(
+    isCarType(requestedCarType) ? requestedCarType : "sedan",
+  );
   const requestedService = params.get("service") ?? draft?.service_type;
   const initialService: Extract<ServiceType, "tour" | "custom_trip"> =
     requestedService === "custom_trip" ? "custom_trip" : "tour";
@@ -41,6 +48,10 @@ export function BookingPage() {
   const [error, setError] = useState<string | null>(null);
   const [bookingChoice, setBookingChoice] =
     useState<BookingChoice>(initialChoice);
+  const requestedCarId = Number(params.get("car") ?? draft?.car_id ?? 0);
+  const [selectedCarId, setSelectedCarId] = useState(
+    Number.isInteger(requestedCarId) ? requestedCarId : 0,
+  );
   const selectedPassengers = validPassengerCount(
     params.get("passengers") ??
       draft?.passengers ??
@@ -59,9 +70,6 @@ export function BookingPage() {
     whatsapp: "",
     notes: "",
   });
-  const cars = useQuery(
-    carsQuery({ passengers: form.passengers, per_page: 30 }),
-  );
   const tours = useQuery(toursQuery(i18n.language, { per_page: 50 }));
   const selectedTour = tours.data?.data.find((tour) => tour.id === form.tour);
   const effectiveBookingChoice: BookingChoice =
@@ -77,11 +85,40 @@ export function BookingPage() {
         ? t("booking.privateTour")
         : t("booking.customTrip");
   const group = effectiveBookingChoice === "group_tour";
+  const privateTour = effectiveBookingChoice === "private_tour";
+  const cars = useQuery(
+    carsQuery({
+      ...(premium ? { category: "premium" as const } : {}),
+      per_page: 100,
+      sort: "price_asc",
+    }),
+  );
+  const availableTypes = useMemo(
+    () => new Set(cars.data?.data.map((car) => car.type) ?? []),
+    [cars.data],
+  );
+  const effectiveCarType =
+    !privateTour || !cars.data || availableTypes.has(selectedCarType)
+      ? selectedCarType
+      : (carTypes.find((type) => availableTypes.has(type)) ?? selectedCarType);
+  const eligibleCars = (cars.data?.data ?? []).filter((car) => {
+    if (group) return car.passenger_capacity >= form.passengers;
+    if (privateTour) return car.type === effectiveCarType;
+    return true;
+  });
   const effectivePassengers = form.passengers;
   const automaticCarId =
-    cars.data?.data.find((car) => car.id === draft?.car_id)?.id ??
-    cars.data?.data[0]?.id ??
+    eligibleCars.find((car) => car.id === selectedCarId)?.id ??
+    selectBestVehicleType(eligibleCars, form.passengers)?.id ??
     0;
+  const selectedCar = eligibleCars.find(
+    (car) => car.id === automaticCarId,
+  );
+  const passengerCapacityExceeded = Boolean(
+    (premium || privateTour) &&
+      selectedCar &&
+      form.passengers > selectedCar.passenger_capacity,
+  );
   const effectiveDate = form.date;
   const effectiveTime = group
     ? (selectedTour?.start_time ?? "09:00")
@@ -135,9 +172,10 @@ export function BookingPage() {
           form.tour &&
           form.date &&
           automaticCarId &&
+          !passengerCapacityExceeded &&
           (!group || effectivePickup),
         )
-      : Boolean(form.date && automaticCarId);
+      : Boolean(form.date && automaticCarId && !passengerCapacityExceeded);
 
   async function review() {
     setError(null);
@@ -288,6 +326,31 @@ export function BookingPage() {
                   </select>
                 </label>
               )}
+              {privateTour && (
+                <label className="text-sm font-semibold sm:col-span-2">
+                  {t("booking.transport")}
+                  <select
+                    value={effectiveCarType}
+                    onChange={(event) => {
+                      setSelectedCarType(
+                        event.target.value as typeof selectedCarType,
+                      );
+                      setSelectedCarId(0);
+                    }}
+                    className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
+                  >
+                    {carTypes.map((type) => (
+                      <option
+                        key={type}
+                        value={type}
+                        disabled={Boolean(cars.data && !availableTypes.has(type))}
+                      >
+                        {type} · {carTypeCapacity[type]} {t("common.guests")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label
                 className={`min-w-0 text-sm font-semibold ${group ? "sm:col-span-2" : ""}`}
               >
@@ -327,13 +390,42 @@ export function BookingPage() {
                   </label>
                 </>
               )}
-              {group ? (
+              {!group && premium && (
+                <label className="text-sm font-semibold sm:col-span-2">
+                  {t("customTrip.selectPremiumCar")}
+                  <select
+                    value={automaticCarId || ""}
+                    onChange={(event) => {
+                      const carId = Number(event.target.value);
+                      setSelectedCarId(carId);
+                    }}
+                    className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4"
+                  >
+                    {eligibleCars.map((car) => (
+                      <option key={car.id} value={car.id}>
+                        {car.name} · {car.passenger_capacity}{" "}
+                        {t("common.guests")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {group || premium || privateTour ? (
                 <label className="text-sm font-semibold sm:col-span-2">
                   {t("booking.passengers")}
                   <NumericInput
                     required
                     min={1}
-                    max={Math.min(selectedTour?.max_passengers ?? 20, 20)}
+                    max={
+                      group
+                        ? Math.min(selectedTour?.max_passengers ?? 20, 20)
+                        : privateTour
+                          ? Math.min(
+                              carTypeCapacity[effectiveCarType],
+                              selectedTour?.max_passengers ?? 255,
+                            )
+                        : (selectedCar?.passenger_capacity ?? 255)
+                    }
                     value={effectivePassengers}
                     onValueChange={(value) => {
                       if (value !== null) update("passengers", value);
@@ -346,12 +438,19 @@ export function BookingPage() {
                   <strong>{t("booking.passengers")}:</strong> {form.passengers}
                 </div>
               )}
-              {!group && (
+              {passengerCapacityExceeded && selectedCar && (
+                <p className="text-sm text-danger sm:col-span-2">
+                  {t("customTrip.passengerCapacityExceeded", {
+                    count: selectedCar.passenger_capacity,
+                  })}
+                </p>
+              )}
+              {!group && !premium && !privateTour ? (
                 <div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2">
                   <strong>{t("booking.transport")}</strong>{" "}
                   {t("booking.automaticVehicle")}
                 </div>
-              )}
+              ) : null}
               {group && selectedTour && (
                 <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
                   <div className="rounded-2xl bg-stone p-4 text-sm">
@@ -471,6 +570,16 @@ export function BookingPage() {
                   </dt>
                   <dd className="mt-1 font-semibold">{effectivePassengers}</dd>
                 </div>
+                {!group && (
+                  <div>
+                    <dt className="text-xs uppercase text-ink/45">
+                      {t("booking.transport")}
+                    </dt>
+                    <dd className="mt-1 font-semibold capitalize">
+                      {estimate.data.car.type}
+                    </dd>
+                  </div>
+                )}
                 <div>
                   <dt className="text-xs uppercase text-ink/45">
                     {t(group ? "booking.meetingPlace" : "booking.pickup")}
