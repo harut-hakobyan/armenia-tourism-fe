@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Clock3, MapPin, Route, UsersRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -8,7 +8,8 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { QueryError } from "@/components/ui/QueryState";
 import { buttonStyles } from "@/components/ui/button-styles";
 import { TourGallerySlideshow } from "@/components/catalog/TourGallerySlideshow";
-import { tourQuery } from "@/features/catalog/api";
+import { carsQuery, tourQuery } from "@/features/catalog/api";
+import { carTypeCapacity, carTypes, isCarType } from "@/features/cars/types";
 import { formatMoney } from "@/lib/money";
 import type { Tour } from "@/types/domain";
 
@@ -71,8 +72,27 @@ export function TourDetailsPage() {
   const { slug = "" } = useParams();
   const [searchParams] = useSearchParams();
   const premium = searchParams.get("vehicle") === "premium";
+  const requestedType = searchParams.get("type");
+  const [selectedCarType, setSelectedCarType] = useState(
+    isCarType(requestedType) ? requestedType : "sedan",
+  );
   const { i18n, t } = useTranslation();
   const tour = useQuery(tourQuery(i18n.language, slug));
+  const cars = useQuery(
+    carsQuery({
+      ...(premium ? { category: "premium" as const } : {}),
+      per_page: 100,
+    }),
+  );
+  const availableTypes = useMemo(
+    () => new Set(cars.data?.data.map((car) => car.type) ?? []),
+    [cars.data],
+  );
+
+  const effectiveCarType =
+    !cars.data || availableTypes.has(selectedCarType)
+      ? selectedCarType
+      : (carTypes.find((type) => availableTypes.has(type)) ?? selectedCarType);
 
   if (tour.isPending) return <PageLoader />;
   if (tour.isError)
@@ -219,6 +239,26 @@ export function TourDetailsPage() {
               </div>
             ) : (
               <>
+                <label className="mt-6 block text-sm font-semibold">
+                  {t("booking.transport")}
+                  <select
+                    value={effectiveCarType}
+                    onChange={(event) =>
+                      setSelectedCarType(event.target.value as typeof selectedCarType)
+                    }
+                    className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
+                  >
+                    {carTypes.map((type) => (
+                      <option
+                        key={type}
+                        value={type}
+                        disabled={Boolean(cars.data && !availableTypes.has(type))}
+                      >
+                        {type} · {carTypeCapacity[type]} {t("common.guests")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <ul className="mt-6 space-y-3 text-sm text-ink/65">
                   <li className="flex gap-2">
                     <MapPin className="size-4 text-apricot" />
@@ -232,7 +272,7 @@ export function TourDetailsPage() {
                   </li>
                 </ul>
                 <Link
-                  to={`/booking?service=tour&tour=${item.id}${premium ? "&vehicle=premium" : ""}`}
+                  to={`/booking?service=tour&tour=${item.id}&type=${effectiveCarType}${premium ? "&vehicle=premium" : ""}`}
                   className={`${buttonStyles()} mt-7 w-full`}
                 >
                   {t("tourDetails.chooseDate")}

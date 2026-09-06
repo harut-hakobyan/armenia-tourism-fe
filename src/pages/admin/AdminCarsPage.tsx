@@ -13,6 +13,13 @@ import { formatMoney } from "@/lib/money";
 
 type CarForm = CarAdminInput;
 
+const carTypeCapacity: Record<CarForm["type"], number> = {
+  sedan: 4,
+  minivan: 6,
+  minibus: 10,
+  bus: 20,
+};
+
 const emptyForm: CarForm = {
   brand: "",
   model: "",
@@ -20,7 +27,7 @@ const emptyForm: CarForm = {
   plate_number: "",
   color: "",
   category: "comfort",
-  passenger_capacity: 4,
+  type: "sedan",
   luggage_capacity: 2,
   transmission: "automatic",
   air_conditioning: true,
@@ -38,7 +45,7 @@ function fromItem(item: DirectoryItem): CarForm {
     plate_number: item.plate_number ?? "",
     color: item.color ?? "",
     category: (item.category ?? "comfort") as CarForm["category"],
-    passenger_capacity: item.passenger_capacity ?? 4,
+    type: item.type ?? "sedan",
     luggage_capacity: item.luggage_capacity ?? 0,
     transmission: item.transmission ?? "",
     air_conditioning: item.air_conditioning ?? true,
@@ -184,7 +191,7 @@ export function AdminCarsPage() {
               onChange={(value) => field("color", value)}
             />
             <label className="text-sm font-semibold">
-              Category
+              Service class
               <select
                 value={form.category}
                 onChange={(event) =>
@@ -205,13 +212,24 @@ export function AdminCarsPage() {
                 ))}
               </select>
             </label>
-            <NumberField
-              label="Passenger capacity"
-              value={form.passenger_capacity}
-              onChange={(value) => field("passenger_capacity", value)}
-              min={1}
-              required
-            />
+            <label className="text-sm font-semibold">
+              Vehicle type
+              <select
+                value={form.type}
+                onChange={(event) =>
+                  field("type", event.target.value as CarForm["type"])
+                }
+                className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3 capitalize"
+              >
+                {(["sedan", "minivan", "minibus", "bus"] as const).map(
+                  (type) => (
+                    <option key={type} value={type}>
+                      {type} ({carTypeCapacity[type]} passengers max)
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
             <NumberField
               label="Luggage capacity"
               value={form.luggage_capacity}
@@ -277,7 +295,7 @@ export function AdminCarsPage() {
                 </p>
                 <p className="mt-1 text-xs text-ink/45">
                   {item.year} · {item.plate_number} · {item.category} ·{" "}
-                  {item.passenger_capacity} passengers
+                  {item.type} В· {item.passenger_capacity} passengers
                   {item.base_price_minor !== undefined && item.currency
                     ? ` · ${formatMoney(item.base_price_minor, item.currency as "EUR" | "USD" | "AMD")}`
                     : ""}

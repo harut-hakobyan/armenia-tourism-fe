@@ -48,7 +48,7 @@ export function CarsPage() {
                 {/* Car Information */}
                 <div className="relative bg-white p-6">
                   <p className="text-xs font-bold uppercase tracking-wider text-apricot">
-                    {car.category} · {car.year}
+                    {car.type} · {car.category} · {car.year}
                   </p>
 
                   <h2 className="text-display mt-2 text-3xl leading-tight">

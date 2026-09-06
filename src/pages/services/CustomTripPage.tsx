@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { carsQuery, destinationsQuery } from "@/features/catalog/api";
 import { estimateApi } from "@/features/estimates/api";
-import { selectBestVehicleCategory } from "@/features/estimates/vehicle-allocation";
+import { selectBestVehicleType } from "@/features/estimates/vehicle-allocation";
 import { bookingDraft } from "@/features/bookings/draft";
 import { formatMoney } from "@/lib/money";
 import type { Destination, RoutePoint } from "@/types/domain";
@@ -40,7 +40,7 @@ export function CustomTripPage() {
       per_page: 30,
     }),
   );
-  const recommendedCar = selectBestVehicleCategory(
+  const recommendedCar = selectBestVehicleType(
     cars.data?.data ?? [],
     passengers,
   );
