@@ -478,7 +478,7 @@ export const adminApi = {
     code: string;
     type: "percentage" | "fixed";
     value: number;
-    currency: Currency;
+    currency?: Currency;
     active: boolean;
   }): Promise<CmsItem> =>
     (await apiClient.post<ApiEnvelope<CmsItem>>("/admin/promo-codes", input))
