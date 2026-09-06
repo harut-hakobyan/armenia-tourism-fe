@@ -267,14 +267,6 @@ export function CustomTripPage() {
                   estimate.data.price.currency,
                 )}
               </p>
-              {estimate.data.vehicle_allocation && (
-                <p className="mt-2 text-sm font-semibold text-ink/60">
-                  {estimate.data.vehicle_allocation.count} ×{" "}
-                  {estimate.data.vehicle_allocation.category} vehicle
-                  {estimate.data.vehicle_allocation.count === 1 ? "" : "s"} ·{" "}
-                  {estimate.data.vehicle_allocation.capacity_per_vehicle} seats each
-                </p>
-              )}
               <Button className="mt-4 w-full" onClick={continueBooking}>
                 {t("customTrip.continue")}
               </Button>
