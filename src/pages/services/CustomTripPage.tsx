@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { carsQuery, destinationsQuery } from "@/features/catalog/api";
 import { estimateApi } from "@/features/estimates/api";
+import { selectBestVehicleCategory } from "@/features/estimates/vehicle-allocation";
 import { bookingDraft } from "@/features/bookings/draft";
 import { formatMoney } from "@/lib/money";
 import type { Destination, RoutePoint } from "@/types/domain";
@@ -30,12 +31,12 @@ export function CustomTripPage() {
   const [passengers, setPassengers] = useState(2);
   const cars = useQuery(
     carsQuery({
-      passengers,
       ...(premium ? { category: "premium" as const } : {}),
+      sort: "price_asc",
       per_page: 30,
     }),
   );
-  const selectedCar = cars.data?.data[0];
+  const selectedCar = selectBestVehicleCategory(cars.data?.data ?? [], passengers);
   const automaticCarId = selectedCar?.id ?? 0;
   const points = () => [
     yerevan,
@@ -168,7 +169,7 @@ export function CustomTripPage() {
             <NumericInput
               required
               min={1}
-              max={7}
+              max={255}
               value={passengers}
               onValueChange={(value) => {
                 if (value !== null) setPassengers(value);
@@ -219,6 +220,14 @@ export function CustomTripPage() {
                   estimate.data.price.currency,
                 )}
               </p>
+              {estimate.data.vehicle_allocation && (
+                <p className="mt-2 text-sm font-semibold text-ink/60">
+                  {estimate.data.vehicle_allocation.count} ×{" "}
+                  {estimate.data.vehicle_allocation.category} vehicle
+                  {estimate.data.vehicle_allocation.count === 1 ? "" : "s"} ·{" "}
+                  {estimate.data.vehicle_allocation.capacity_per_vehicle} seats each
+                </p>
+              )}
               <Button className="mt-4 w-full" onClick={continueBooking}>
                 {t("customTrip.continue")}
               </Button>

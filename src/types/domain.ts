@@ -175,6 +175,11 @@ export interface Estimate {
   estimated_duration_minutes?: number;
   route_provider?: string;
   route_points?: RoutePoint[];
+  vehicle_allocation?: {
+    category: Car["category"];
+    count: number;
+    capacity_per_vehicle: number;
+  };
   price: PriceBreakdown;
 }
 

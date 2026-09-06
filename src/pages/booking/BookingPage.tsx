@@ -10,6 +10,7 @@ import { carsQuery, toursQuery } from "@/features/catalog/api";
 import { bookingApi } from "@/features/bookings/api";
 import { bookingDraft } from "@/features/bookings/draft";
 import { estimateApi } from "@/features/estimates/api";
+import { selectBestVehicleCategory } from "@/features/estimates/vehicle-allocation";
 import { formatMoney } from "@/lib/money";
 import { toApiError } from "@/lib/api-client";
 import type { ServiceType } from "@/types/domain";
@@ -23,7 +24,7 @@ type BookingChoice = "group_tour" | "private_tour" | "custom_trip";
 
 function validPassengerCount(value: unknown): number {
   const count = Number(value);
-  return Number.isInteger(count) && count >= 1 && count <= 50 ? count : 1;
+  return Number.isInteger(count) && count >= 1 && count <= 255 ? count : 1;
 }
 
 export function BookingPage() {
@@ -60,7 +61,11 @@ export function BookingPage() {
     notes: "",
   });
   const cars = useQuery(
-    carsQuery({ passengers: form.passengers, per_page: 30 }),
+    carsQuery(
+      form.service === "custom_trip"
+        ? { per_page: 30, sort: "price_asc" }
+        : { passengers: form.passengers, per_page: 30 },
+    ),
   );
   const tours = useQuery(toursQuery(i18n.language, { per_page: 50 }));
   const selectedTour = tours.data?.data.find((tour) => tour.id === form.tour);
@@ -80,7 +85,7 @@ export function BookingPage() {
   const effectivePassengers = form.passengers;
   const automaticCarId =
     cars.data?.data.find((car) => car.id === draft?.car_id)?.id ??
-    cars.data?.data[0]?.id ??
+    selectBestVehicleCategory(cars.data?.data ?? [], form.passengers)?.id ??
     0;
   const effectiveDate = form.date;
   const effectiveTime = group
