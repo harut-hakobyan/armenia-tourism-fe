@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check, Clock3, MapPin, Route, UsersRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Container } from "@/components/ui/Container";
 import { PageLoader } from "@/components/ui/PageLoader";
@@ -68,6 +68,8 @@ function TourDescription({ description }: { description: string | null }) {
 
 export function TourDetailsPage() {
   const { slug = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const premium = searchParams.get("vehicle") === "premium";
   const { i18n, t } = useTranslation();
   const tour = useQuery(tourQuery(i18n.language, slug));
 
@@ -240,7 +242,7 @@ export function TourDetailsPage() {
                   </li>
                 </ul>
                 <Link
-                  to={`/booking?service=tour&tour=${item.id}`}
+                  to={`/booking?service=tour&tour=${item.id}${premium ? "&vehicle=premium" : ""}`}
                   className={`${buttonStyles()} mt-7 w-full`}
                 >
                   {t("tourDetails.chooseDate")}

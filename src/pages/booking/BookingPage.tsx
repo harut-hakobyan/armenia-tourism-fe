@@ -32,6 +32,7 @@ export function BookingPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const draft = bookingDraft.get();
+  const premium = params.get("vehicle") === "premium";
   const requestedService = params.get("service") ?? draft?.service_type;
   const initialService: Extract<ServiceType, "tour" | "custom_trip"> =
     requestedService === "custom_trip" ? "custom_trip" : "tour";
@@ -42,6 +43,10 @@ export function BookingPage() {
   const [error, setError] = useState<string | null>(null);
   const [bookingChoice, setBookingChoice] =
     useState<BookingChoice>(initialChoice);
+  const requestedCarId = Number(params.get("car") ?? draft?.car_id ?? 0);
+  const [selectedCarId, setSelectedCarId] = useState(
+    Number.isInteger(requestedCarId) ? requestedCarId : 0,
+  );
   const selectedPassengers = validPassengerCount(
     params.get("passengers") ??
       draft?.passengers ??
@@ -62,7 +67,12 @@ export function BookingPage() {
   });
   const cars = useQuery(
     carsQuery(
-      form.service === "custom_trip"
+      premium
+        ? {
+            category: "premium",
+            per_page: 30,
+          }
+        : form.service === "custom_trip"
         ? { per_page: 30, sort: "price_asc" }
         : { passengers: form.passengers, per_page: 30 },
     ),
@@ -84,9 +94,15 @@ export function BookingPage() {
   const group = effectiveBookingChoice === "group_tour";
   const effectivePassengers = form.passengers;
   const automaticCarId =
-    cars.data?.data.find((car) => car.id === draft?.car_id)?.id ??
+    cars.data?.data.find((car) => car.id === selectedCarId)?.id ??
     selectBestVehicleCategory(cars.data?.data ?? [], form.passengers)?.id ??
     0;
+  const selectedCar = cars.data?.data.find(
+    (car) => car.id === automaticCarId,
+  );
+  const premiumCapacityExceeded = Boolean(
+    premium && selectedCar && form.passengers > selectedCar.passenger_capacity,
+  );
   const effectiveDate = form.date;
   const effectiveTime = group
     ? (selectedTour?.start_time ?? "09:00")
@@ -140,9 +156,10 @@ export function BookingPage() {
           form.tour &&
           form.date &&
           automaticCarId &&
+          !premiumCapacityExceeded &&
           (!group || effectivePickup),
         )
-      : Boolean(form.date && automaticCarId);
+      : Boolean(form.date && automaticCarId && !premiumCapacityExceeded);
 
   async function review() {
     setError(null);
@@ -332,13 +349,37 @@ export function BookingPage() {
                   </label>
                 </>
               )}
-              {group ? (
+              {!group && premium && (
+                <label className="text-sm font-semibold sm:col-span-2">
+                  {t("customTrip.selectPremiumCar")}
+                  <select
+                    value={automaticCarId || ""}
+                    onChange={(event) => {
+                      const carId = Number(event.target.value);
+                      setSelectedCarId(carId);
+                    }}
+                    className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4"
+                  >
+                    {cars.data?.data.map((car) => (
+                      <option key={car.id} value={car.id}>
+                        {car.name} · {car.passenger_capacity}{" "}
+                        {t("common.guests")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {group || premium ? (
                 <label className="text-sm font-semibold sm:col-span-2">
                   {t("booking.passengers")}
                   <NumericInput
                     required
                     min={1}
-                    max={Math.min(selectedTour?.max_passengers ?? 20, 20)}
+                    max={
+                      group
+                        ? Math.min(selectedTour?.max_passengers ?? 20, 20)
+                        : (selectedCar?.passenger_capacity ?? 255)
+                    }
                     value={effectivePassengers}
                     onValueChange={(value) => {
                       if (value !== null) update("passengers", value);
@@ -351,12 +392,19 @@ export function BookingPage() {
                   <strong>{t("booking.passengers")}:</strong> {form.passengers}
                 </div>
               )}
-              {!group && (
+              {premiumCapacityExceeded && selectedCar && (
+                <p className="text-sm text-danger sm:col-span-2">
+                  {t("customTrip.passengerCapacityExceeded", {
+                    count: selectedCar.passenger_capacity,
+                  })}
+                </p>
+              )}
+              {!group && !premium ? (
                 <div className="rounded-2xl bg-stone p-4 text-sm sm:col-span-2">
                   <strong>{t("booking.transport")}</strong>{" "}
                   {t("booking.automaticVehicle")}
                 </div>
-              )}
+              ) : null}
               {group && selectedTour && (
                 <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
                   <div className="rounded-2xl bg-stone p-4 text-sm">
