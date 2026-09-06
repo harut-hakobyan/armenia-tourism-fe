@@ -3,6 +3,7 @@ import {
   CarFront,
   MapPin,
   Phone,
+  Tag,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -86,6 +87,13 @@ export function BookingStatusPage() {
               })}
             />
           )}
+          {booking.price.breakdown.promo_code && (
+            <Info
+              icon={Tag}
+              label={t("booking.promoCode")}
+              value={booking.price.breakdown.promo_code}
+            />
+          )}
         </div>
         {qrPayload && attendance ? (
           <div className="mt-6">
@@ -107,6 +115,14 @@ export function BookingStatusPage() {
               <p className="mt-1 text-3xl font-bold text-forest">
                 {formatMoney(booking.price.total_minor, booking.price.currency)}
               </p>
+              {booking.price.discount_minor > 0 && (
+                <p className="mt-1 text-sm font-semibold text-emerald-700">
+                  {t("booking.discount")}: -{formatMoney(
+                    booking.price.discount_minor,
+                    booking.price.currency,
+                  )}
+                </p>
+              )}
             </div>
             <div className="text-right text-sm text-ink/55">
               <p>

@@ -201,7 +201,7 @@ export interface CmsItem {
   code?: string;
   type?: string;
   value?: number;
-  currency?: string;
+  currency?: Currency;
   category?: string;
   active?: boolean;
   verified?: boolean;
@@ -478,11 +478,14 @@ export const adminApi = {
     code: string;
     type: "percentage" | "fixed";
     value: number;
-    currency: string;
+    currency: Currency;
     active: boolean;
   }): Promise<CmsItem> =>
     (await apiClient.post<ApiEnvelope<CmsItem>>("/admin/promo-codes", input))
       .data.data,
+  deletePromo: async (id: number): Promise<void> => {
+    await apiClient.delete(`/admin/promo-codes/${id}`);
+  },
   createFaq: async (input: {
     category: string;
     active: boolean;
