@@ -146,8 +146,8 @@ export function TourDetailsPage() {
         </Container>
       </section>
 
-      <Container className="grid gap-12 py-16 lg:grid-cols-[1fr_380px]">
-        <div>
+      <Container className="grid min-w-0 gap-12 py-16 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="min-w-0">
           <h2 className="text-display text-4xl">{t("tourDetails.journey")}</h2>
           <TourDescription description={item.description} />
           <h2 className="text-display mt-14 text-4xl">
@@ -187,7 +187,7 @@ export function TourDetailsPage() {
               <h2 className="text-display text-4xl">
                 {t("tourDetails.gallery")}
               </h2>
-              <div className="mt-8">
+              <div className="mt-8 min-w-0 max-w-full overflow-hidden">
                 <TourGallerySlideshow
                   images={item.gallery}
                   title={item.title}

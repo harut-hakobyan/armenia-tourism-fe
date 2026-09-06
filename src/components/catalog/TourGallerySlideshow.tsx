@@ -22,16 +22,18 @@ export function TourGallerySlideshow({
   const [active, setActive] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const pointerStart = useRef<number | null>(null);
+  const thumbnailRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const imageCount = images.length;
-  const activeImage = images[active];
+  const visibleActive = imageCount > 0 ? active % imageCount : 0;
+  const activeImage = images[visibleActive];
 
   function show(index: number) {
     setActive((index + imageCount) % imageCount);
   }
 
   function move(direction: -1 | 1) {
-    show(active + direction);
+    show(visibleActive + direction);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLElement>) {
@@ -66,15 +68,23 @@ export function TourGallerySlideshow({
     };
   });
 
+  useEffect(() => {
+    thumbnailRefs.current[visibleActive]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [visibleActive]);
+
   if (!activeImage) return null;
 
   const activeAlt =
-    activeImage.alt_text ?? `${title} ${galleryLabel} ${active + 1}`;
+    activeImage.alt_text ?? `${title} ${galleryLabel} ${visibleActive + 1}`;
 
   return (
     <>
       <div
-        className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-soft"
+        className="group w-full min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-soft"
         role="region"
         aria-roledescription="carousel"
         aria-label={`${title} ${galleryLabel}`}
@@ -97,7 +107,7 @@ export function TourGallerySlideshow({
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10" />
 
           <span className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md">
-            {active + 1} / {imageCount}
+            {visibleActive + 1} / {imageCount}
           </span>
           <button
             type="button"
@@ -117,17 +127,20 @@ export function TourGallerySlideshow({
         </div>
 
         {imageCount > 1 && (
-          <div className="flex gap-3 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-full min-w-0 max-w-full gap-3 overflow-x-auto overscroll-x-contain p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {images.map((image, index) => (
               <button
                 key={image.id}
+                ref={(element) => {
+                  thumbnailRefs.current[index] = element;
+                }}
                 type="button"
                 onClick={() => show(index)}
                 aria-label={`Show image ${index + 1} of ${imageCount}`}
                 aria-current={index === active ? "true" : undefined}
                 className={cn(
                   "relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-stone ring-offset-2 transition sm:h-20 sm:w-28",
-                  index === active
+                  index === visibleActive
                     ? "ring-2 ring-apricot"
                     : "opacity-60 hover:opacity-100",
                 )}
@@ -146,7 +159,7 @@ export function TourGallerySlideshow({
 
       {expanded && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/95 p-4 sm:p-10"
+          className="fixed inset-0 z-[70] flex max-h-dvh max-w-[100vw] items-center justify-center overflow-hidden bg-black/95 p-4 sm:p-10"
           role="dialog"
           aria-modal="true"
           aria-label={`${title} ${galleryLabel}`}
@@ -165,13 +178,13 @@ export function TourGallerySlideshow({
             <X className="size-5" />
           </button>
           <p className="absolute left-5 top-5 text-sm font-bold text-white/70 sm:left-8 sm:top-8">
-            {active + 1} / {imageCount}
+            {visibleActive + 1} / {imageCount}
           </p>
           <img
             key={activeImage.id}
             src={activeImage.url}
             alt={activeAlt}
-            className="max-h-full max-w-full select-none object-contain"
+            className="max-h-[calc(100dvh-2rem)] max-w-[calc(100vw-2rem)] select-none object-contain sm:max-h-[calc(100dvh-5rem)] sm:max-w-[calc(100vw-5rem)]"
             draggable={false}
           />
           {imageCount > 1 && (
