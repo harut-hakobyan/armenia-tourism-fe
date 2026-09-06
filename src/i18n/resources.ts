@@ -156,6 +156,9 @@ const en = {
     remove: "Remove",
     estimate: "Trip estimate",
     passengers: "Passengers",
+    selectPremiumCar: "Choose a premium vehicle",
+    passengerCapacityExceeded:
+      "This vehicle carries up to {{count}} passengers.",
     transport: "Transport:",
     premiumClass: "Premium class",
     searchingPremium: "Searching for an available premium vehicle…",
@@ -447,6 +450,9 @@ const ru = {
     remove: "Удалить",
     estimate: "Расчёт поездки",
     passengers: "Пассажиры",
+    selectPremiumCar: "Выберите премиальный автомобиль",
+    passengerCapacityExceeded:
+      "Этот автомобиль вмещает до {{count}} пассажиров.",
     transport: "Транспорт:",
     premiumClass: "Премиум-класс",
     searchingPremium: "Ищем доступный автомобиль премиум-класса…",
@@ -734,6 +740,9 @@ const hy = {
     remove: "Հեռացնել",
     estimate: "Ուղևորության հաշվարկ",
     passengers: "Ուղևորներ",
+    selectPremiumCar: "Ընտրեք պրեմիում մեքենա",
+    passengerCapacityExceeded:
+      "Այս մեքենան տեղավորում է առավելագույնը {{count}} ուղևոր։",
     transport: "Տրանսպորտ՝",
     premiumClass: "Պրեմիում դաս",
     searchingPremium: "Փնտրում ենք հասանելի պրեմիում մեքենա…",

@@ -4,7 +4,7 @@ import type { Estimate, RoutePoint } from '@/types/domain'
 
 interface BaseEstimateInput { car_id?: number; passengers: number; promo_code?: string; customer_email?: string }
 export interface TourEstimateInput extends BaseEstimateInput { tour_id: number; booking_date: string }
-export interface RouteEstimateInput extends BaseEstimateInput { car_id: number; route_points: RoutePoint[] }
+export interface RouteEstimateInput extends BaseEstimateInput { car_id: number; route_points: RoutePoint[]; premium_class?: boolean }
 export interface TransferEstimateInput extends RouteEstimateInput { extra_waiting_minutes?: number }
 export interface PrivateDriverEstimateInput extends BaseEstimateInput { car_id: number; duration_minutes: number }
 

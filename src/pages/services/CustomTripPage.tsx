@@ -24,11 +24,15 @@ export function CustomTripPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const premium = params.get("vehicle") === "premium";
+  const requestedPremiumCarId = Number(params.get("car"));
   const destinations = useQuery(
     destinationsQuery(i18n.language, { per_page: 50 }),
   );
   const [selected, setSelected] = useState<Destination[]>([]);
   const [passengers, setPassengers] = useState(2);
+  const [premiumCarId, setPremiumCarId] = useState(
+    Number.isInteger(requestedPremiumCarId) ? requestedPremiumCarId : 0,
+  );
   const cars = useQuery(
     carsQuery({
       ...(premium ? { category: "premium" as const } : {}),
@@ -36,7 +40,16 @@ export function CustomTripPage() {
       per_page: 30,
     }),
   );
-  const selectedCar = selectBestVehicleCategory(cars.data?.data ?? [], passengers);
+  const recommendedCar = selectBestVehicleCategory(
+    cars.data?.data ?? [],
+    passengers,
+  );
+  const selectedCar = premium
+    ? (cars.data?.data.find((car) => car.id === premiumCarId) ?? recommendedCar)
+    : recommendedCar;
+  const premiumCapacityExceeded = Boolean(
+    premium && selectedCar && passengers > selectedCar.passenger_capacity,
+  );
   const automaticCarId = selectedCar?.id ?? 0;
   const points = () => [
     yerevan,
@@ -53,6 +66,7 @@ export function CustomTripPage() {
         car_id: automaticCarId,
         passengers,
         route_points: points(),
+        ...(premium ? { premium_class: true } : {}),
       }),
   });
 
@@ -164,19 +178,49 @@ export function CustomTripPage() {
         </div>
         <aside className="rounded-3xl bg-white p-6 shadow-soft">
           <h2 className="text-xl font-bold">{t("customTrip.estimate")}</h2>
+          {premium && cars.data?.data.length ? (
+            <label className="mt-5 block text-sm font-semibold">
+              {t("customTrip.selectPremiumCar")}
+              <select
+                value={selectedCar?.id ?? ""}
+                onChange={(event) => {
+                  const carId = Number(event.target.value);
+                  setPremiumCarId(carId);
+                  estimate.reset();
+                }}
+                className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4"
+              >
+                {cars.data.data.map((car) => (
+                  <option key={car.id} value={car.id}>
+                    {car.name} · {car.passenger_capacity} {t("common.guests")}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <label className="mt-5 block text-sm font-semibold">
             {t("customTrip.passengers")}
             <NumericInput
               required
               min={1}
-              max={255}
+              max={premium ? (selectedCar?.passenger_capacity ?? 255) : 255}
               value={passengers}
               onValueChange={(value) => {
-                if (value !== null) setPassengers(value);
+                if (value !== null) {
+                  setPassengers(value);
+                  estimate.reset();
+                }
               }}
               className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"
             />
           </label>
+          {premiumCapacityExceeded && selectedCar && (
+            <p className="mt-2 text-sm text-danger">
+              {t("customTrip.passengerCapacityExceeded", {
+                count: selectedCar.passenger_capacity,
+              })}
+            </p>
+          )}
           <div
             className={`mt-4 rounded-2xl p-4 text-sm ${premium ? "bg-forest text-white" : "bg-stone"}`}
           >
@@ -184,7 +228,7 @@ export function CustomTripPage() {
             <strong>{t("customTrip.transport")}</strong>{" "}
             {premium
               ? selectedCar
-                ? t("customTrip.premiumClass")
+                ? selectedCar.name
                 : t("customTrip.searchingPremium")
               : t("customTrip.automaticVehicle")}
           </div>
@@ -195,7 +239,10 @@ export function CustomTripPage() {
           )}
           <Button
             disabled={
-              !automaticCarId || selected.length < 1 || estimate.isPending
+              !automaticCarId ||
+              selected.length < 1 ||
+              premiumCapacityExceeded ||
+              estimate.isPending
             }
             onClick={() => estimate.mutate()}
             className="mt-6 w-full"

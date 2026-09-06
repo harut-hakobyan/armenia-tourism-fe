@@ -60,6 +60,16 @@ function PremiumCarCard({ car }: { car: Car }) {
             </span>
           )}
         </div>
+        <Link
+          to={`/build-your-trip?vehicle=premium&car=${car.id}`}
+          className={cn(
+            buttonStyles("secondary"),
+            "mt-6 w-full border-[#d8bc87] bg-[#d8bc87] text-forest hover:border-[#efd49d] hover:bg-[#efd49d]",
+          )}
+        >
+          {t("customTrip.selectPremiumCar")}
+          <ArrowRight className="ml-2 size-4" />
+        </Link>
       </div>
     </article>
   );
@@ -174,7 +184,7 @@ export function ToursPage() {
                 />
               ))
             : tours.data.data.map((tour) => (
-                <TourCard key={tour.id} tour={tour} />
+                <TourCard key={tour.id} tour={tour} premium={view === "premium"} />
               ))}
         </div>
       )}
