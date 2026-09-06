@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { QueryError } from "@/components/ui/QueryState";
 import { buttonStyles } from "@/components/ui/button-styles";
+import { TourGallerySlideshow } from "@/components/catalog/TourGallerySlideshow";
 import { tourQuery } from "@/features/catalog/api";
 import { formatMoney } from "@/lib/money";
 import type { Tour } from "@/types/domain";
@@ -166,23 +167,12 @@ export function TourDetailsPage() {
               <h2 className="text-display text-4xl">
                 {t("tourDetails.gallery")}
               </h2>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                {item.gallery.map((image, index) => (
-                  <figure
-                    key={image.id}
-                    className={`overflow-hidden rounded-3xl bg-stone ${index === 0 && item.gallery.length > 2 ? "sm:col-span-2" : ""}`}
-                  >
-                    <img
-                      src={image.url}
-                      alt={
-                        image.alt_text ??
-                        `${item.title} ${t("tourDetails.gallery")} ${index + 1}`
-                      }
-                      loading="lazy"
-                      className={`w-full object-cover transition duration-500 hover:scale-[1.02] ${index === 0 && item.gallery.length > 2 ? "aspect-[16/8]" : "aspect-[4/3]"}`}
-                    />
-                  </figure>
-                ))}
+              <div className="mt-8">
+                <TourGallerySlideshow
+                  images={item.gallery}
+                  title={item.title}
+                  galleryLabel={t("tourDetails.gallery")}
+                />
               </div>
             </section>
           )}
