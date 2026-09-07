@@ -66,7 +66,7 @@ export interface DirectoryItem {
 }
 export type CarCategory =
   "economy" | "comfort" | "business" | "suv" | "minivan" | "premium" | "bus";
-export type CarType = "sedan" | "minivan" | "minibus" | "bus";
+export type CarType = "coupe" | "sedan" | "minivan" | "minibus" | "bus";
 export interface CarAdminInput {
   brand: string;
   model: string;
@@ -87,6 +87,7 @@ export interface CarTypePrice {
   type: CarType;
   passenger_capacity: number;
   fixed_price_minor: number;
+  price_per_km_minor: number;
   currency: Currency;
 }
 export interface DriverAdminInput {
@@ -315,7 +316,7 @@ export const adminApi = {
     ).data.data,
   updateCarTypePrice: async (
     type: CarType,
-    input: Pick<CarTypePrice, "fixed_price_minor" | "currency">,
+    input: Pick<CarTypePrice, "fixed_price_minor" | "price_per_km_minor" | "currency">,
   ): Promise<CarTypePrice> =>
     (
       await apiClient.patch<ApiEnvelope<CarTypePrice>>(

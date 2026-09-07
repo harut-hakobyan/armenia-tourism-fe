@@ -21,14 +21,14 @@ export function AdminCarTypePricesPage() {
         </p>
         <h1 className="mt-2 text-3xl font-bold">Vehicle type prices</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/55">
-          Set one fixed price for each vehicle type. Passenger capacity is
-          defined by the type and applies automatically to every vehicle.
+          Set the standard fixed price and the per-kilometre rate used by Build
+          Your Trip. Passenger capacity is defined by the vehicle type.
         </p>
       </div>
-      <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {prices.data?.map((price) => (
           <TypePriceEditor
-            key={`${price.type}-${price.fixed_price_minor}-${price.currency}`}
+            key={`${price.type}-${price.fixed_price_minor}-${price.price_per_km_minor}-${price.currency}`}
             initial={price}
             onSaved={() => void prices.refetch()}
           />
@@ -45,21 +45,25 @@ function TypePriceEditor({
   initial: CarTypePrice;
   onSaved: () => void;
 }) {
-  const [amount, setAmount] = useState(
+  const [fixedAmount, setFixedAmount] = useState(
     fromMinorUnits(initial.fixed_price_minor, initial.currency),
+  );
+  const [perKilometreAmount, setPerKilometreAmount] = useState(
+    fromMinorUnits(initial.price_per_km_minor, initial.currency),
   );
   const [currency, setCurrency] = useState(initial.currency);
   const [error, setError] = useState<string | null>(null);
   const save = useMutation({
     mutationFn: () =>
       adminApi.updateCarTypePrice(initial.type, {
-        fixed_price_minor: toMinorUnits(amount, currency),
+        fixed_price_minor: toMinorUnits(fixedAmount, currency),
+        price_per_km_minor: toMinorUnits(perKilometreAmount, currency),
         currency,
       }),
     onSuccess: onSaved,
     onError: (reason) => setError(toApiError(reason).message),
   });
-  const Icon = initial.type === "sedan" ? CarFront : BusFront;
+  const Icon = initial.type === "coupe" || initial.type === "sedan" ? CarFront : BusFront;
 
   return (
     <section className="rounded-3xl bg-white p-6 shadow-sm">
@@ -75,12 +79,12 @@ function TypePriceEditor({
         </div>
       </div>
       <label className="mt-5 block text-sm font-semibold">
-        Fixed price
+        Standard fixed price
         <div className="mt-2 flex gap-2">
           <NumericInput
-            value={amount}
+            value={fixedAmount}
             onValueChange={(value) => {
-              if (value !== null) setAmount(value);
+              if (value !== null) setFixedAmount(value);
             }}
             min={0}
             decimal={currency !== "AMD"}
@@ -99,6 +103,23 @@ function TypePriceEditor({
           </select>
         </div>
       </label>
+      <label className="mt-4 block text-sm font-semibold">
+        Price per KM
+        <div className="mt-2 flex">
+          <NumericInput
+            value={perKilometreAmount}
+            onValueChange={(value) => {
+              if (value !== null) setPerKilometreAmount(value);
+            }}
+            min={0}
+            decimal={currency !== "AMD"}
+            className="min-w-0 flex-1 rounded-l-xl border border-black/10 px-3"
+          />
+          <span className="flex items-center rounded-r-xl border border-l-0 border-black/10 bg-stone px-3 text-xs font-bold text-ink/55">
+            {currency} / km
+          </span>
+        </div>
+      </label>
       {error && <p className="mt-3 text-sm text-danger">{error}</p>}
       <Button
         type="button"
@@ -109,7 +130,7 @@ function TypePriceEditor({
         disabled={save.isPending}
         className="mt-5 w-full"
       >
-        {save.isPending ? "Saving…" : "Save price"}
+        {save.isPending ? "Saving…" : "Save prices"}
       </Button>
     </section>
   );

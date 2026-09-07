@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Car } from "@/types/domain";
 import { selectBestVehicleType } from "./vehicle-allocation";
 
-function car(id: number, capacity: number, baseMinor: number): Car {
+function car(id: number, capacity: number, pricePerKilometreMinor: number): Car {
   return {
     id,
     name: `Test Vehicle ${id}`,
@@ -12,13 +12,15 @@ function car(id: number, capacity: number, baseMinor: number): Car {
     color: "White",
     category: id === 1 ? "economy" : id === 2 ? "minivan" : "bus",
     type:
-      capacity <= 4
-        ? "sedan"
-        : capacity <= 6
-          ? "minivan"
-          : capacity <= 10
-            ? "minibus"
-            : "bus",
+      capacity <= 3
+        ? "coupe"
+        : capacity <= 4
+          ? "sedan"
+          : capacity <= 6
+            ? "minivan"
+            : capacity <= 10
+              ? "minibus"
+              : "bus",
     passenger_capacity: capacity,
     luggage_capacity: 0,
     transmission: "automatic",
@@ -28,8 +30,8 @@ function car(id: number, capacity: number, baseMinor: number): Car {
       child_seat_available: false,
     },
     rates: {
-      base_minor: baseMinor,
-      per_km_minor: 0,
+      base_minor: 0,
+      per_km_minor: pricePerKilometreMinor,
       per_hour_minor: 0,
       currency: "AMD",
     },
@@ -47,5 +49,9 @@ describe("selectBestVehicleType", () => {
 
   it("minimizes vehicle count for large groups", () => {
     expect(selectBestVehicleType(cars, 80)?.id).toBe(3);
+  });
+
+  it("uses the per-kilometre rate when vehicle counts are equal", () => {
+    expect(selectBestVehicleType([car(4, 3, 90), car(5, 4, 70)], 3)?.id).toBe(5);
   });
 });
