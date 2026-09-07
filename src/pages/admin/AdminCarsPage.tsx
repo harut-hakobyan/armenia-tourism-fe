@@ -14,6 +14,7 @@ import { formatMoney } from "@/lib/money";
 type CarForm = CarAdminInput;
 
 const carTypeCapacity: Record<CarForm["type"], number> = {
+  coupe: 3,
   sedan: 4,
   minivan: 6,
   minibus: 10,
@@ -221,7 +222,7 @@ export function AdminCarsPage() {
                 }
                 className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3 capitalize"
               >
-                {(["sedan", "minivan", "minibus", "bus"] as const).map(
+                {(["coupe", "sedan", "minivan", "minibus", "bus"] as const).map(
                   (type) => (
                     <option key={type} value={type}>
                       {type} ({carTypeCapacity[type]} passengers max)
