@@ -17,7 +17,7 @@ export interface CreateBookingInput {
   dropoff_latitude?: number
   dropoff_longitude?: number
   customer_name: string
-  customer_email?: string
+  customer_email: string
   customer_phone: string
   customer_whatsapp?: string
   customer_nationality?: string

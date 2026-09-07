@@ -215,7 +215,7 @@ export function BookingPage() {
         passengers: effectivePassengers,
         pickup_address: effectivePickup,
         customer_name: form.name,
-        ...(form.email ? { customer_email: form.email } : {}),
+        customer_email: form.email,
         customer_phone: form.phone,
         ...(form.whatsapp ? { customer_whatsapp: form.whatsapp } : {}),
         ...(form.notes ? { customer_notes: form.notes } : {}),
@@ -507,6 +507,7 @@ export function BookingPage() {
               <label className="text-sm font-semibold">
                 {t("booking.email")}
                 <input
+                  required
                   type="email"
                   value={form.email}
                   onChange={(e) => update("email", e.target.value)}
