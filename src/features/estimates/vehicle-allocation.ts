@@ -27,8 +27,8 @@ export function selectBestVehicleType(
       return candidateCount < bestCount ? candidate : best;
     }
 
-    const candidateTotal = candidateCount * candidate.rates.base_minor;
-    const bestTotal = bestCount * best.rates.base_minor;
+    const candidateTotal = candidateCount * candidate.rates.per_km_minor;
+    const bestTotal = bestCount * best.rates.per_km_minor;
 
     if (candidateTotal !== bestTotal) {
       return candidateTotal < bestTotal ? candidate : best;

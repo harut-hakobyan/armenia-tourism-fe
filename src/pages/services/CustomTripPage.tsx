@@ -12,7 +12,7 @@ import { selectBestVehicleType } from "@/features/estimates/vehicle-allocation";
 import { bookingDraft } from "@/features/bookings/draft";
 import { toApiError } from "@/lib/api-client";
 import { formatMoney } from "@/lib/money";
-import type { Destination, RoutePoint } from "@/types/domain";
+import type { CarType, Destination, RoutePoint } from "@/types/domain";
 
 const yerevan: RoutePoint = {
   latitude: 40.1872023,
@@ -31,6 +31,7 @@ export function CustomTripPage() {
   );
   const [selected, setSelected] = useState<Destination[]>([]);
   const [passengers, setPassengers] = useState(2);
+  const [selectedVehicleType, setSelectedVehicleType] = useState<CarType | "">("");
   const [promoCode, setPromoCode] = useState("");
   const [premiumCarId, setPremiumCarId] = useState(
     Number.isInteger(requestedPremiumCarId) ? requestedPremiumCarId : 0,
@@ -46,9 +47,13 @@ export function CustomTripPage() {
     cars.data?.data ?? [],
     passengers,
   );
+  const availableVehicleTypes = Array.from(
+    new Set(cars.data?.data.map((car) => car.type) ?? []),
+  );
   const selectedCar = premium
     ? (cars.data?.data.find((car) => car.id === premiumCarId) ?? recommendedCar)
-    : recommendedCar;
+    : (cars.data?.data.find((car) => car.type === selectedVehicleType) ??
+      recommendedCar);
   const premiumCapacityExceeded = Boolean(
     premium && selectedCar && passengers > selectedCar.passenger_capacity,
   );
@@ -220,6 +225,26 @@ export function CustomTripPage() {
               className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4"
             />
           </label>
+          {!premium && availableVehicleTypes.length > 0 && (
+            <label className="mt-5 block text-sm font-semibold">
+              Vehicle type
+              <select
+                value={selectedVehicleType}
+                onChange={(event) => {
+                  setSelectedVehicleType(event.target.value as CarType | "");
+                  estimate.reset();
+                }}
+                className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
+              >
+                <option value="">Recommended vehicle</option>
+                {availableVehicleTypes.map((type) => (
+                  <option value={type} key={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label className="mt-5 block text-sm font-semibold">
             {t("booking.promoCode")}
             <input

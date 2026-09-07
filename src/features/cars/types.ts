@@ -1,8 +1,9 @@
 import type { CarType } from "@/types/domain";
 
-export const carTypes: CarType[] = ["sedan", "minivan", "minibus", "bus"];
+export const carTypes: CarType[] = ["coupe", "sedan", "minivan", "minibus", "bus"];
 
 export const carTypeCapacity: Record<CarType, number> = {
+  coupe: 3,
   sedan: 4,
   minivan: 6,
   minibus: 10,
