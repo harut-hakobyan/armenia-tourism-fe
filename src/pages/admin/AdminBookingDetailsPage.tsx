@@ -7,6 +7,8 @@ import { adminApi } from '@/features/admin/api'
 import { toApiError } from '@/lib/api-client'
 import { formatMoney } from '@/lib/money'
 
+const assignmentEnabled = import.meta.env.VITE_BOOKING_ASSIGNMENT_ENABLED === 'true'
+
 export function AdminBookingDetailsPage() {
   const id = Number(useParams().id)
   const navigate = useNavigate()
@@ -18,7 +20,7 @@ export function AdminBookingDetailsPage() {
   const availability = useQuery({
     queryKey: ['admin', 'booking', id, 'availability'],
     queryFn: () => adminApi.availability(id),
-    enabled: booking.data?.booking_status === 'confirmed' || booking.data?.booking_status === 'assigned',
+    enabled: assignmentEnabled && (booking.data?.booking_status === 'confirmed' || booking.data?.booking_status === 'assigned'),
   })
   const action = useMutation({
     mutationFn: async (type: 'confirm' | 'cancel' | 'assign') => type === 'confirm'
@@ -42,7 +44,7 @@ export function AdminBookingDetailsPage() {
       </div>
       <aside className="space-y-5"><section className="rounded-3xl bg-white p-6 shadow-sm"><h2 className="font-bold">Actions</h2>
         {current.booking_status === 'pending' && <Button onClick={() => action.mutate('confirm')} className="mt-5 w-full">Confirm booking</Button>}
-        {(current.booking_status === 'confirmed' || current.booking_status === 'assigned') && <><label className="mt-5 block text-sm font-semibold">Available car<select value={car} onChange={(event) => { setCar(Number(event.target.value)); setDriver(0) }} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="0">Choose car</option>{availability.data?.cars.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.plate_number}</option>)}</select></label><label className="mt-4 block text-sm font-semibold">Available driver<select value={driver} onChange={(event) => setDriver(Number(event.target.value))} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="0">Choose driver</option>{compatibleDrivers.map((item) => <option value={item.id} key={item.id}>{item.name} · ★ {item.rating}</option>)}</select></label><Button disabled={!car || !driver || action.isPending} onClick={() => action.mutate('assign')} className="mt-5 w-full">Assign trip</Button></>}
+        {assignmentEnabled && (current.booking_status === 'confirmed' || current.booking_status === 'assigned') && <><label className="mt-5 block text-sm font-semibold">Available car<select value={car} onChange={(event) => { setCar(Number(event.target.value)); setDriver(0) }} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="0">Choose car</option>{availability.data?.cars.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.plate_number}</option>)}</select></label><label className="mt-4 block text-sm font-semibold">Available driver<select value={driver} onChange={(event) => setDriver(Number(event.target.value))} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="0">Choose driver</option>{compatibleDrivers.map((item) => <option value={item.id} key={item.id}>{item.name} · ★ {item.rating}</option>)}</select></label><Button disabled={!car || !driver || action.isPending} onClick={() => action.mutate('assign')} className="mt-5 w-full">Assign trip</Button></>}
         {!['completed', 'cancelled', 'no_show'].includes(current.booking_status) && <Button variant="ghost" onClick={() => action.mutate('cancel')} className="mt-3 w-full text-danger">Cancel booking</Button>}
         {error && <p className="mt-4 text-sm text-danger">{error}</p>}
       </section></aside>

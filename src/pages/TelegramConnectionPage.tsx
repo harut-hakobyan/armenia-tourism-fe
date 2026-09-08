@@ -30,7 +30,7 @@ export function TelegramConnectionPage() {
   }, [expiresAt, status.data?.connected])
   const operationalActions = user?.role === 'driver'
     ? ['Receive newly assigned trips', 'View customer, pickup, time, and vehicle details', 'Update every trip stage through inline buttons']
-    : ['Receive every new booking', 'Confirm or cancel pending bookings', 'Select available cars and drivers for confirmed trips']
+    : ['Receive every new booking', 'Confirm or cancel pending bookings', 'Use QR check-in after confirmation']
   const error = link.error ?? preferences.error ?? disconnect.error ?? status.error
 
   return <div className="max-w-3xl">
