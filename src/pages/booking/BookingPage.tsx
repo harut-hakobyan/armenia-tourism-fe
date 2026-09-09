@@ -227,8 +227,13 @@ export function BookingPage() {
         ...(draft?.dropoff_address
           ? { dropoff_address: draft.dropoff_address }
           : {}),
-        ...(draft?.service_options
-          ? { service_options: draft.service_options }
+        ...(draft?.service_options || premium
+          ? {
+              service_options: {
+                ...(draft?.service_options ?? {}),
+                ...(premium ? { vehicle_class: "premium" } : {}),
+              },
+            }
           : {}),
       });
       bookingDraft.clear();

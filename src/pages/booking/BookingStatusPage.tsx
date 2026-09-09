@@ -1,12 +1,16 @@
 import {
   CalendarDays,
   CarFront,
+  Mail,
   MapPin,
+  MessageCircle,
   Phone,
+  Send,
   Tag,
   Users,
   type LucideIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -15,6 +19,7 @@ import { Container } from "@/components/ui/Container";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { QueryError } from "@/components/ui/QueryState";
 import { bookingApi } from "@/features/bookings/api";
+import { contentApi } from "@/features/content/api";
 import { formatMoney } from "@/lib/money";
 
 export function BookingStatusPage() {
@@ -24,6 +29,10 @@ export function BookingStatusPage() {
     queryKey: ["booking", bookingNumber, token, i18n.language],
     queryFn: () => bookingApi.findPublic(bookingNumber, token),
     retry: false,
+  });
+  const settings = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: contentApi.settings,
   });
   if (query.isPending) return <PageLoader />;
   if (query.isError)
@@ -35,6 +44,18 @@ export function BookingStatusPage() {
   const booking = query.data;
   const attendance = booking.attendance;
   const qrPayload = booking.qr_payload;
+  const premiumCar =
+    booking.car?.category === "premium" ? booking.car : null;
+  const phone = settings.data?.company_phone?.trim() ?? "";
+  const email = settings.data?.company_email?.trim() ?? "";
+  const phoneDigits = phone.replace(/\D/g, "");
+  const whatsappDigits = (
+    settings.data?.whatsapp_number?.trim() || phone
+  ).replace(/\D/g, "");
+  const telegramLink = getTelegramLink(
+    settings.data?.telegram?.trim(),
+    phoneDigits,
+  );
 
   return (
     <Container className="py-16 sm:py-24">
@@ -61,21 +82,12 @@ export function BookingStatusPage() {
           <Info
             icon={CarFront}
             label={t("common.car")}
-            value={booking.car.name}
+            value={premiumCar?.name ?? t("booking.automaticVehicle")}
           />
           <Info
             icon={MapPin}
             label={t("booking.pickup")}
             value={booking.pickup.address}
-          />
-          <Info
-            icon={Phone}
-            label={t("booking.driver")}
-            value={
-              booking.driver
-                ? `${booking.driver.name} · ${booking.driver.phone}`
-                : t("booking.assignedAfter")
-            }
           />
           {attendance && (
             <Info
@@ -93,6 +105,51 @@ export function BookingStatusPage() {
               label={t("booking.promoCode")}
               value={booking.price.breakdown.promo_code}
             />
+          )}
+          {(phone || email) && (
+            <section className="rounded-2xl bg-white p-5 shadow-sm sm:col-span-2">
+              <Phone className="size-5 text-apricot" />
+              <h2 className="mt-3 text-xs uppercase text-ink/40">
+                {t("actions.contact")}
+              </h2>
+              {phone && (
+                <p className="mt-1 text-lg font-semibold">{phone}</p>
+              )}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {phone && (
+                  <ContactLink href={`tel:${phone.replace(/[^+\d]/g, "")}`}>
+                    <Phone className="size-4" />
+                    {t("booking.phone")}
+                  </ContactLink>
+                )}
+                {whatsappDigits && (
+                  <ContactLink href={`https://wa.me/${whatsappDigits}`} external>
+                    <MessageCircle className="size-4" />
+                    {t("booking.whatsapp")}
+                  </ContactLink>
+                )}
+                {phone && (
+                  <ContactLink
+                    href={`viber://chat?number=${encodeURIComponent(phone.replace(/[^+\d]/g, ""))}`}
+                  >
+                    <MessageCircle className="size-4" />
+                    Viber
+                  </ContactLink>
+                )}
+                {telegramLink && (
+                  <ContactLink href={telegramLink} external>
+                    <Send className="size-4" />
+                    Telegram
+                  </ContactLink>
+                )}
+                {email && (
+                  <ContactLink href={`mailto:${email}`}>
+                    <Mail className="size-4" />
+                    {t("booking.email")}
+                  </ContactLink>
+                )}
+              </div>
+            </section>
           )}
         </div>
         {qrPayload && attendance ? (
@@ -146,6 +203,41 @@ export function BookingStatusPage() {
       </div>
     </Container>
   );
+}
+
+function ContactLink({
+  href,
+  external = false,
+  children,
+}: {
+  href: string;
+  external?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+      className="inline-flex min-h-10 items-center gap-2 rounded-full border border-forest/15 px-4 text-sm font-semibold text-forest transition hover:border-forest/35 hover:bg-stone"
+    >
+      {children}
+    </a>
+  );
+}
+
+function getTelegramLink(
+  configured: string | undefined,
+  fallbackPhoneDigits: string,
+): string | undefined {
+  if (!configured) {
+    return fallbackPhoneDigits
+      ? `https://t.me/+${fallbackPhoneDigits}`
+      : undefined;
+  }
+
+  if (/^https?:\/\//i.test(configured)) return configured;
+
+  return `https://t.me/${configured.replace(/^@/, "")}`;
 }
 
 function Info({

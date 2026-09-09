@@ -152,6 +152,7 @@ export interface TourAdminInput {
   sort_order: number;
   translations: Array<AdminTranslation & { title: string }>;
   itinerary: TourItineraryInput[];
+  car_type_prices?: Array<{ type: CarType; price_minor: number }>;
 }
 export interface AdminTour extends Omit<TourAdminInput, "itinerary"> {
   id: number;
