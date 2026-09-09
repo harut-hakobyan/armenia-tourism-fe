@@ -4,15 +4,22 @@ import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Copy, ImagePlus, Pencil, Pl
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { adminApi, type AdminTour, type TourAdminInput, type TourItineraryInput } from '@/features/admin/api'
+import { carTypes } from '@/features/cars/types'
 import { toApiError } from '@/lib/api-client'
 import { formatMoney, fromMinorUnits, toMinorUnits } from '@/lib/money'
+import type { CarType } from '@/types/domain'
 import { Checkbox, NumberField, TextField, TranslationFields } from './AdminCatalogControls'
 import { emptyTranslations, type LocalizedContent } from './admin-catalog-types'
 
-interface TourForm extends Omit<TourAdminInput, 'starting_price_minor' | 'translations'> { starting_price:number; translations:LocalizedContent[] }
+type CarTypePriceForm = Record<CarType, number>
+
+interface TourForm extends Omit<TourAdminInput, 'starting_price_minor' | 'translations' | 'car_type_prices'> { starting_price:number; car_type_prices:CarTypePriceForm; translations:LocalizedContent[] }
+
+const emptyCarTypePrices = (): CarTypePriceForm => ({ coupe:0, sedan:0, minivan:0, minibus:0, bus:0 })
 
 const emptyForm = (): TourForm => ({
   category_id:null, slug:'', duration_minutes:480, approximate_distance_km:null, starting_price:0,
+  car_type_prices:emptyCarTypePrices(),
   currency:'EUR', pricing_type:'per_car', format:'private', active:true, featured:false,
   start_time:null, meeting_point:null,
   max_passengers:4, pickup_available:true, dropoff_available:true, free_cancellation_hours:24,
@@ -20,15 +27,17 @@ const emptyForm = (): TourForm => ({
 })
 
 function fromTour(tour:AdminTour):TourForm {
-  return {...tour, itinerary:(tour.itinerary??[]).map(({destination_id,day_number,duration_minutes,optional,notes})=>({destination_id,day_number,duration_minutes,optional,notes})), starting_price:fromMinorUnits(tour.starting_price_minor,tour.currency), translations:emptyTranslations().map((empty) => {
+  const car_type_prices=emptyCarTypePrices()
+  for(const price of tour.car_type_prices??[])car_type_prices[price.type]=fromMinorUnits(price.price_minor,tour.currency)
+  return {...tour, car_type_prices, itinerary:(tour.itinerary??[]).map(({destination_id,day_number,duration_minutes,optional,notes})=>({destination_id,day_number,duration_minutes,optional,notes})), starting_price:fromMinorUnits(tour.starting_price_minor,tour.currency), translations:emptyTranslations().map((empty) => {
     const translation=tour.translations.find((item) => item.locale===empty.locale)
     return {...empty, label:translation?.title??'', short_description:translation?.short_description??'', description:translation?.description??'', seo_title:translation?.seo_title??'', seo_description:translation?.seo_description??''}
   })}
 }
 
 function payload(form:TourForm):TourAdminInput {
-  const {starting_price,translations,...fields}=form
-  return {...fields,starting_price_minor:toMinorUnits(starting_price,form.currency),translations:translations.map(({label,...translation})=>({...translation,title:label,short_description:translation.short_description||null,description:translation.description||null,seo_title:translation.seo_title||null,seo_description:translation.seo_description||null}))}
+  const {starting_price,car_type_prices,translations,...fields}=form
+  return {...fields,pricing_type:form.format==='private'?'per_car':form.pricing_type,starting_price_minor:toMinorUnits(starting_price,form.currency),...(form.format==='private'?{car_type_prices:carTypes.map((type)=>({type,price_minor:toMinorUnits(car_type_prices[type],form.currency)}))}:{}),translations:translations.map(({label,...translation})=>({...translation,title:label,short_description:translation.short_description||null,description:translation.description||null,seo_title:translation.seo_title||null,seo_description:translation.seo_description||null}))}
 }
 
 function title(tour:AdminTour){return tour.translations.find((translation)=>translation.locale==='en')?.title??tour.slug}
@@ -74,10 +83,12 @@ export function AdminToursPage({ formPage = false }: { formPage?: boolean }){
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><TextField label="Slug" value={form.slug} onChange={(value)=>field('slug',value)} required/><label className="text-sm font-semibold">Category<select value={form.category_id??''} onChange={(event)=>field('category_id',event.target.value?Number(event.target.value):null)} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="">No category</option>{categories.data?.map((category)=><option value={category.id} key={category.id}>{category.translations.find((item)=>item.locale==='en')?.name??category.slug}</option>)}</select></label>
         <label className="text-sm font-semibold">Tour type<select value={form.format} onChange={(event)=>field('format',event.target.value as TourForm['format'])} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="private">Private</option><option value="group">Group</option></select></label>
         {form.format==='group'&&<><label className="text-sm font-semibold">Start time<input type="time" required value={form.start_time??''} onChange={(event)=>field('start_time',event.target.value||null)} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"/></label><TextField label="Meeting place" value={form.meeting_point??''} onChange={(value)=>field('meeting_point',value||null)} required/></>}
-        <label className="text-sm font-semibold">Pricing type<select value={form.pricing_type} onChange={(event)=>field('pricing_type',event.target.value as TourForm['pricing_type'])} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="per_car">Per car</option><option value="per_person">Per person</option><option value="fixed">Fixed</option><option value="custom">Custom</option></select></label>
-        <NumberField label={`Starting price (${form.currency})`} value={form.starting_price} onChange={(value)=>field('starting_price',value??0)} min={0} step={form.currency==='AMD'?'1':'0.01'} required/><label className="text-sm font-semibold">Currency<select value={form.currency} onChange={(event)=>field('currency',event.target.value as TourForm['currency'])} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3">{['EUR','USD','AMD'].map((currency)=><option key={currency}>{currency}</option>)}</select></label>
+        {form.format==='group'&&<><label className="text-sm font-semibold">Pricing type<select value={form.pricing_type} onChange={(event)=>field('pricing_type',event.target.value as TourForm['pricing_type'])} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"><option value="per_person">Per person</option><option value="fixed">Fixed</option><option value="custom">Custom</option></select></label><NumberField label={`Starting price (${form.currency})`} value={form.starting_price} onChange={(value)=>field('starting_price',value??0)} min={0} step={form.currency==='AMD'?'1':'0.01'} required/></>}
+        <label className="text-sm font-semibold">Currency<select value={form.currency} onChange={(event)=>field('currency',event.target.value as TourForm['currency'])} className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3">{['EUR','USD','AMD'].map((currency)=><option key={currency}>{currency}</option>)}</select></label>
         <NumberField label="Duration (minutes)" value={form.duration_minutes} onChange={(value)=>field('duration_minutes',value??1)} min={1} required/><NumberField label="Distance (km)" value={form.approximate_distance_km} onChange={(value)=>field('approximate_distance_km',value)} min={0}/><NumberField label="Maximum passengers" value={form.max_passengers} onChange={(value)=>field('max_passengers',value)} min={1}/><NumberField label="Free cancellation (hours)" value={form.free_cancellation_hours} onChange={(value)=>field('free_cancellation_hours',value??0)} min={0} required/><NumberField label="Sort order" value={form.sort_order} onChange={(value)=>field('sort_order',value??0)} min={0} required/>
-      </div><div className="mt-6 flex flex-wrap gap-5"><Checkbox label="Active" checked={form.active} onChange={(value)=>field('active',value)}/><Checkbox label="Featured" checked={form.featured} onChange={(value)=>field('featured',value)}/><Checkbox label="Pickup available" checked={form.pickup_available} onChange={(value)=>field('pickup_available',value)}/><Checkbox label="Drop-off available" checked={form.dropoff_available} onChange={(value)=>field('dropoff_available',value)}/></div>
+      </div>
+      {form.format==='private'&&<section className="mt-7 rounded-2xl border border-black/8 bg-stone/45 p-5"><h3 className="font-bold">Prices by vehicle type</h3><p className="mt-1 text-sm text-ink/50">Set the complete tour price for each vehicle type. The customer will pay the price of the type they select.</p><div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{carTypes.map((type)=><NumberField key={type} label={`${type.charAt(0).toUpperCase()}${type.slice(1)} (${form.currency})`} value={form.car_type_prices[type]} onChange={(value)=>field('car_type_prices',{...form.car_type_prices,[type]:value??0})} min={0} step={form.currency==='AMD'?'1':'0.01'} required/>)}</div></section>}
+      <div className="mt-6 flex flex-wrap gap-5"><Checkbox label="Active" checked={form.active} onChange={(value)=>field('active',value)}/><Checkbox label="Featured" checked={form.featured} onChange={(value)=>field('featured',value)}/><Checkbox label="Pickup available" checked={form.pickup_available} onChange={(value)=>field('pickup_available',value)}/><Checkbox label="Drop-off available" checked={form.dropoff_available} onChange={(value)=>field('dropoff_available',value)}/></div>
       <section className="mt-7 rounded-2xl border border-black/8 bg-stone/45 p-5"><div className="flex flex-wrap items-center justify-between gap-3"><button type="button" onClick={()=>setItineraryOpen((current)=>!current)} aria-expanded={itineraryOpen} className="flex min-w-0 flex-1 items-center justify-between gap-3 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"><div><h3 className="font-bold">Itinerary</h3><p className="mt-1 text-sm text-ink/50">{itineraryOpen?'Add destinations in display order. Stops are automatically numbered within each day.':`${form.itinerary.length} ${form.itinerary.length===1?'stop':'stops'} configured`}</p></div>{itineraryOpen?<ChevronUp className="size-5 shrink-0 text-ink/50"/>:<ChevronDown className="size-5 shrink-0 text-ink/50"/>}</button>{itineraryOpen&&<Button type="button" onClick={addStop} disabled={!destinations.data?.data.length}><Plus className="mr-2 size-4"/>Add destination</Button>}</div>
         {itineraryOpen&&<>
         {destinations.isPending&&<p className="mt-5 text-sm text-ink/50">Loading destinations…</p>}

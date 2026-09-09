@@ -106,6 +106,16 @@ export function TourDetailsPage() {
 
   const item = tour.data;
   const group = item.format === "group";
+  const selectedTypePrice = (item.car_type_prices ?? []).find(
+    (price) => price.type === effectiveCarType,
+  );
+  const displayedPrice = group
+    ? item.starting_price
+    : {
+        amount_minor:
+          selectedTypePrice?.amount_minor ?? item.starting_price.amount_minor,
+        currency: selectedTypePrice?.currency ?? item.starting_price.currency,
+      };
   const rememberBookingDraft = () => {
     const normalizedPromoCode = promoCode.trim().toUpperCase();
     bookingDraft.set({
@@ -215,8 +225,8 @@ export function TourDetailsPage() {
             </p>
             <p className="mt-1 text-3xl font-bold text-forest">
               {formatMoney(
-                item.starting_price.amount_minor,
-                item.starting_price.currency,
+                displayedPrice.amount_minor,
+                displayedPrice.currency,
                 i18n.language,
               )}{" "}
               <span className="text-sm font-normal text-ink/50">

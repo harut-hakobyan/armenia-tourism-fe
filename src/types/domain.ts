@@ -89,6 +89,11 @@ export interface Tour {
     currency: Currency;
     pricing_type: PricingType;
   };
+  car_type_prices: Array<{
+    type: CarType;
+    amount_minor: number;
+    currency: Currency;
+  }>;
   format: TourFormat;
   start_time: string | null;
   meeting_point: string | null;
@@ -207,6 +212,7 @@ export interface Booking {
     longitude: string | null;
   };
   passengers: number;
+  requested_car_type: CarType | null;
   attendance: {
     status: AttendanceStatus;
     checked_in_passengers: number;
@@ -220,7 +226,7 @@ export interface Booking {
     whatsapp: string | null;
     nationality: string | null;
   };
-  car: { id: number; name: string; category: string };
+  car: { id: number; name: string; category: string } | null;
   driver: { name: string; phone: string } | null;
   price: {
     subtotal_minor: number;
@@ -269,7 +275,7 @@ export interface AdminBooking extends Booking {
   id: number;
   customer_id: number | null;
   tour_id: number | null;
-  car_id: number;
+  car_id: number | null;
   driver_id: number | null;
   promo_code_id: number | null;
   admin_notes: string | null;
