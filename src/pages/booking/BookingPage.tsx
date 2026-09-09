@@ -562,6 +562,7 @@ export function BookingPage() {
                     !effectivePickup ||
                     !form.name ||
                     !form.phone ||
+                    !form.email.trim() ||
                     estimate.isPending
                   }
                   className="flex-1"
