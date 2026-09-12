@@ -143,6 +143,7 @@ export interface TourAdminInput {
   pricing_type: PricingType;
   format: TourFormat;
   start_time: string | null;
+  end_time: string | null;
   meeting_point: string | null;
   active: boolean;
   featured: boolean;

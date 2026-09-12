@@ -518,9 +518,13 @@ export function BookingPage() {
                 </div>
               ) : null}
               {group && selectedTour && (
-                <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+                <div className="grid gap-3 sm:col-span-2 sm:grid-cols-3">
                   <div className="rounded-2xl bg-stone p-4 text-sm">
                     <strong>{t("booking.startTime")}</strong> {effectiveTime}
+                  </div>
+                  <div className="rounded-2xl bg-stone p-4 text-sm">
+                    <strong>{t("booking.endTime")}</strong>{" "}
+                    {selectedTour.end_time ?? t("common.toBeConfirmed")}
                   </div>
                   <div className="rounded-2xl bg-stone p-4 text-sm">
                     <strong>{t("booking.meetingPlace")}</strong>{" "}
@@ -646,6 +650,9 @@ export function BookingPage() {
                   </dt>
                   <dd className="mt-1 font-semibold">
                     {effectiveDate} · {effectiveTime}
+                    {group && selectedTour?.end_time
+                      ? ` – ${selectedTour.end_time}`
+                      : ""}
                   </dd>
                 </div>
                 <div>

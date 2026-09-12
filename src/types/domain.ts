@@ -96,6 +96,7 @@ export interface Tour {
   }>;
   format: TourFormat;
   start_time: string | null;
+  end_time: string | null;
   meeting_point: string | null;
   max_passengers: number | null;
   pickup_available: boolean;
@@ -174,6 +175,7 @@ export interface Estimate {
   car: { id: number; name: string; type: CarType };
   tour_format?: TourFormat;
   starts_at?: string;
+  ends_at?: string;
   meeting_point?: string;
   passengers: number;
   duration_minutes?: number;
