@@ -1,4 +1,15 @@
 const en = {
+  premierCars: {
+    title: "Choose your Premier car",
+    description: "Select the exact car for your individual tour.",
+    choose: "Choose a Premier car",
+    change: "Change Premier car",
+    selected: "Selected Premier car",
+    chooseThis: "Choose this car",
+    chosen: "Selected",
+    unavailable: "No Premier cars are currently available.",
+    close: "Close Premier car selection",
+  },
   brand: "Armenia Journeys",
   nav: {
     tours: "Group Tours",
@@ -298,6 +309,17 @@ const en = {
 };
 
 const ru = {
+  premierCars: {
+    title: "Выберите автомобиль Premier",
+    description: "Выберите конкретный автомобиль для вашего индивидуального тура.",
+    choose: "Выбрать автомобиль Premier",
+    change: "Изменить автомобиль Premier",
+    selected: "Выбранный автомобиль Premier",
+    chooseThis: "Выбрать этот автомобиль",
+    chosen: "Выбрано",
+    unavailable: "Сейчас нет доступных автомобилей Premier.",
+    close: "Закрыть выбор автомобиля Premier",
+  },
   brand: "Путешествия по Армении",
   nav: {
     tours: "Групповые туры",
@@ -596,6 +618,17 @@ const ru = {
 };
 
 const hy = {
+  premierCars: {
+    title: "Ընտրեք Premier մեքենան",
+    description: "Ընտրեք ձեր անհատական տուրի կոնկրետ մեքենան։",
+    choose: "Ընտրել Premier մեքենա",
+    change: "Փոխել Premier մեքենան",
+    selected: "Ընտրված Premier մեքենան",
+    chooseThis: "Ընտրել այս մեքենան",
+    chosen: "Ընտրված է",
+    unavailable: "Այս պահին Premier մեքենաներ հասանելի չեն։",
+    close: "Փակել Premier մեքենայի ընտրությունը",
+  },
   brand: "Ճանապարհորդություններ Հայաստանում",
   nav: {
     tours: "Խմբային տուրեր",

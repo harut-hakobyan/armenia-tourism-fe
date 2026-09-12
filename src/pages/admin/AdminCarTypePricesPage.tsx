@@ -22,7 +22,7 @@ export function AdminCarTypePricesPage() {
         <h1 className="mt-2 text-3xl font-bold">Vehicle type prices</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/55">
           Set the standard fixed price and the per-kilometre rate used by Build
-          Your Trip. Passenger capacity is defined by the vehicle type.
+          Your Trip. Premier capacity is configured separately for each car.
         </p>
       </div>
       <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -63,7 +63,7 @@ function TypePriceEditor({
     onSuccess: onSaved,
     onError: (reason) => setError(toApiError(reason).message),
   });
-  const Icon = initial.type === "coupe" || initial.type === "sedan" ? CarFront : BusFront;
+  const Icon = initial.type === "premier" || initial.type === "sedan" ? CarFront : BusFront;
 
   return (
     <section className="rounded-3xl bg-white p-6 shadow-sm">
@@ -74,7 +74,9 @@ function TypePriceEditor({
         <div>
           <h2 className="text-xl font-bold capitalize">{initial.type}</h2>
           <p className="mt-0.5 text-xs font-semibold text-ink/45">
-            Maximum {initial.passenger_capacity} passengers
+            {initial.passenger_capacity === null
+              ? "Passenger capacity varies by car"
+              : `Maximum ${initial.passenger_capacity} passengers`}
           </p>
         </div>
       </div>

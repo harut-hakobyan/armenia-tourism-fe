@@ -15,7 +15,7 @@ type CarTypePriceForm = Record<CarType, number>
 
 interface TourForm extends Omit<TourAdminInput, 'starting_price_minor' | 'translations' | 'car_type_prices'> { starting_price:number; car_type_prices:CarTypePriceForm; translations:LocalizedContent[] }
 
-const emptyCarTypePrices = (): CarTypePriceForm => ({ coupe:0, sedan:0, minivan:0, minibus:0, bus:0 })
+const emptyCarTypePrices = (): CarTypePriceForm => ({ premier:0, sedan:0, minivan:0, minibus:0, bus:0 })
 
 const emptyForm = (): TourForm => ({
   category_id:null, slug:'', duration_minutes:480, approximate_distance_km:null, starting_price:0,

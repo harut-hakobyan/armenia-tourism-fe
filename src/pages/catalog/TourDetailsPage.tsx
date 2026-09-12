@@ -8,6 +8,10 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { QueryError } from "@/components/ui/QueryState";
 import { buttonStyles } from "@/components/ui/button-styles";
 import { TourGallerySlideshow } from "@/components/catalog/TourGallerySlideshow";
+import {
+  PremierCarModal,
+  PremierCarSelection,
+} from "@/components/booking/PremierCarModal";
 import { carsQuery, tourQuery } from "@/features/catalog/api";
 import { bookingDraft } from "@/features/bookings/draft";
 import { carTypeCapacity, carTypes, isCarType } from "@/features/cars/types";
@@ -74,8 +78,20 @@ export function TourDetailsPage() {
   const [searchParams] = useSearchParams();
   const premium = searchParams.get("vehicle") === "premium";
   const requestedType = searchParams.get("type");
+  const requestedCarId = Number(searchParams.get("car") ?? 0);
+  const initialCarType = premium
+    ? "premier"
+    : isCarType(requestedType)
+      ? requestedType
+      : "sedan";
   const [selectedCarType, setSelectedCarType] = useState(
-    isCarType(requestedType) ? requestedType : "sedan",
+    initialCarType,
+  );
+  const [selectedPremierCarId, setSelectedPremierCarId] = useState(
+    Number.isInteger(requestedCarId) && requestedCarId > 0 ? requestedCarId : 0,
+  );
+  const [premierModalOpen, setPremierModalOpen] = useState(
+    initialCarType === "premier" && selectedPremierCarId === 0,
   );
   const [promoCode, setPromoCode] = useState("");
   const { i18n, t } = useTranslation();
@@ -86,13 +102,23 @@ export function TourDetailsPage() {
       per_page: 100,
     }),
   );
+  const premierFleet = useQuery(
+    carsQuery({ type: "premier", per_page: 100, sort: "price_asc" }),
+  );
   const availableTypes = useMemo(
-    () => new Set(cars.data?.data.map((car) => car.type) ?? []),
-    [cars.data],
+    () => {
+      const types = new Set(cars.data?.data.map((car) => car.type) ?? []);
+      if (premierFleet.data?.data.length) types.add("premier");
+
+      return types;
+    },
+    [cars.data, premierFleet.data],
   );
 
   const effectiveCarType =
-    !cars.data || availableTypes.has(selectedCarType)
+    selectedCarType === "premier" ||
+    !cars.data ||
+    availableTypes.has(selectedCarType)
       ? selectedCarType
       : (carTypes.find((type) => availableTypes.has(type)) ?? selectedCarType);
 
@@ -106,6 +132,11 @@ export function TourDetailsPage() {
 
   const item = tour.data;
   const group = item.format === "group";
+  const premierSelected = !group && effectiveCarType === "premier";
+  const premierCars = premierFleet.data?.data ?? [];
+  const selectedPremierCar = premierCars.find(
+    (car) => car.id === selectedPremierCarId,
+  );
   const selectedTypePrice = (item.car_type_prices ?? []).find(
     (price) => price.type === effectiveCarType,
   );
@@ -121,9 +152,20 @@ export function TourDetailsPage() {
     bookingDraft.set({
       service_type: "tour",
       tour_id: item.id,
+      ...(premierSelected && selectedPremierCar
+        ? {
+            car_id: selectedPremierCar.id,
+            service_options: { vehicle_class: "premium" as const },
+          }
+        : {}),
       ...(normalizedPromoCode ? { promo_code: normalizedPromoCode } : {}),
     });
   };
+  const bookingUrl = `/booking?service=tour&tour=${item.id}&type=${effectiveCarType}${
+    premierSelected && selectedPremierCar
+      ? `&vehicle=premium&car=${selectedPremierCar.id}`
+      : ""
+  }`;
 
   return (
     <>
@@ -274,9 +316,11 @@ export function TourDetailsPage() {
                   {t("booking.transport")}
                   <select
                     value={effectiveCarType}
-                    onChange={(event) =>
-                      setSelectedCarType(event.target.value as typeof selectedCarType)
-                    }
+                    onChange={(event) => {
+                      const type = event.target.value as typeof selectedCarType;
+                      setSelectedCarType(type);
+                      if (type === "premier") setPremierModalOpen(true);
+                    }}
                     className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
                   >
                     {carTypes.map((type) => (
@@ -285,11 +329,23 @@ export function TourDetailsPage() {
                         value={type}
                         disabled={Boolean(cars.data && !availableTypes.has(type))}
                       >
-                        {type} · {carTypeCapacity[type]} {t("common.guests")}
+                        {type}
+                        {carTypeCapacity[type]
+                          ? ` · ${carTypeCapacity[type]} ${t("common.guests")}`
+                          : ""}
                       </option>
                     ))}
                   </select>
                 </label>
+                {premierSelected && (
+                  <div className="mt-4">
+                    <PremierCarSelection
+                      car={selectedPremierCar}
+                      onOpen={() => setPremierModalOpen(true)}
+                      nameOnly
+                    />
+                  </div>
+                )}
                 <ul className="mt-6 space-y-3 text-sm text-ink/65">
                   <li className="flex gap-2">
                     <MapPin className="size-4 text-apricot" />
@@ -302,18 +358,41 @@ export function TourDetailsPage() {
                     })}
                   </li>
                 </ul>
-                <Link
-                  to={`/booking?service=tour&tour=${item.id}&type=${effectiveCarType}${premium ? "&vehicle=premium" : ""}`}
-                  onClick={rememberBookingDraft}
-                  className={`${buttonStyles()} mt-7 w-full`}
-                >
-                  {t("tourDetails.chooseDate")}
-                </Link>
+                {premierSelected && !selectedPremierCar ? (
+                  <button
+                    type="button"
+                    onClick={() => setPremierModalOpen(true)}
+                    className={`${buttonStyles()} mt-7 w-full`}
+                  >
+                    {t("premierCars.choose")}
+                  </button>
+                ) : (
+                  <Link
+                    to={bookingUrl}
+                    onClick={rememberBookingDraft}
+                    className={`${buttonStyles()} mt-7 w-full`}
+                  >
+                    {t("tourDetails.chooseDate")}
+                  </Link>
+                )}
               </>
             )}
           </div>
         </aside>
       </Container>
+      <PremierCarModal
+        open={premierModalOpen}
+        cars={premierCars}
+        selectedCarId={selectedPremierCarId}
+        loading={premierFleet.isPending}
+        error={premierFleet.isError}
+        onSelect={(car) => {
+          setSelectedPremierCarId(car.id);
+          setPremierModalOpen(false);
+        }}
+        onClose={() => setPremierModalOpen(false)}
+        onRetry={() => void premierFleet.refetch()}
+      />
     </>
   );
 }
