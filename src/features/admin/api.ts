@@ -66,7 +66,7 @@ export interface DirectoryItem {
 }
 export type CarCategory =
   "economy" | "comfort" | "business" | "suv" | "minivan" | "premium" | "bus";
-export type CarType = "coupe" | "sedan" | "minivan" | "minibus" | "bus";
+export type CarType = "premier" | "sedan" | "minivan" | "minibus" | "bus";
 export interface CarAdminInput {
   brand: string;
   model: string;
@@ -75,6 +75,7 @@ export interface CarAdminInput {
   color: string | null;
   category: CarCategory;
   type: CarType;
+  passenger_capacity?: number;
   luggage_capacity: number;
   transmission: string | null;
   air_conditioning: boolean;
@@ -85,7 +86,7 @@ export interface CarAdminInput {
 }
 export interface CarTypePrice {
   type: CarType;
-  passenger_capacity: number;
+  passenger_capacity: number | null;
   fixed_price_minor: number;
   price_per_km_minor: number;
   currency: Currency;

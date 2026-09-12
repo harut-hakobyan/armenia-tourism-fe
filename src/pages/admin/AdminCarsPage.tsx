@@ -13,8 +13,8 @@ import { formatMoney } from "@/lib/money";
 
 type CarForm = CarAdminInput;
 
-const carTypeCapacity: Record<CarForm["type"], number> = {
-  coupe: 3,
+const carTypeCapacity: Record<CarForm["type"], number | null> = {
+  premier: null,
   sedan: 4,
   minivan: 6,
   minibus: 10,
@@ -29,6 +29,7 @@ const emptyForm: CarForm = {
   color: "",
   category: "comfort",
   type: "sedan",
+  passenger_capacity: 3,
   luggage_capacity: 2,
   transmission: "automatic",
   air_conditioning: true,
@@ -47,6 +48,7 @@ function fromItem(item: DirectoryItem): CarForm {
     color: item.color ?? "",
     category: (item.category ?? "comfort") as CarForm["category"],
     type: item.type ?? "sedan",
+    passenger_capacity: item.passenger_capacity ?? 3,
     luggage_capacity: item.luggage_capacity ?? 0,
     transmission: item.transmission ?? "",
     air_conditioning: item.air_conditioning ?? true,
@@ -71,8 +73,12 @@ export function AdminCarsPage() {
     client.invalidateQueries({ queryKey: ["admin", "directory", "cars"] });
   const save = useMutation({
     mutationFn: () => {
+      const { passenger_capacity: passengerCapacity, ...fields } = form;
       const input = {
-        ...form,
+        ...fields,
+        ...(form.type === "premier"
+          ? { passenger_capacity: passengerCapacity }
+          : {}),
         color: form.color || null,
         transmission: form.transmission || null,
       };
@@ -222,15 +228,28 @@ export function AdminCarsPage() {
                 }
                 className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3 capitalize"
               >
-                {(["coupe", "sedan", "minivan", "minibus", "bus"] as const).map(
+                {(["premier", "sedan", "minivan", "minibus", "bus"] as const).map(
                   (type) => (
                     <option key={type} value={type}>
-                      {type} ({carTypeCapacity[type]} passengers max)
+                      {type}
+                      {carTypeCapacity[type]
+                        ? ` (${carTypeCapacity[type]} passengers max)`
+                        : " (capacity per car)"}
                     </option>
                   ),
                 )}
               </select>
             </label>
+            {form.type === "premier" && (
+              <NumberField
+                label="Passenger capacity"
+                value={form.passenger_capacity ?? 1}
+                onChange={(value) => field("passenger_capacity", value ?? 1)}
+                min={1}
+                max={255}
+                required
+              />
+            )}
             <NumberField
               label="Luggage capacity"
               value={form.luggage_capacity}
@@ -385,6 +404,7 @@ function NumberField({
   value,
   onChange,
   min,
+  max,
   step = "1",
   required = false,
 }: {
@@ -392,6 +412,7 @@ function NumberField({
   value: number;
   onChange: (value: number) => void;
   min: number;
+  max?: number;
   step?: string;
   required?: boolean;
 }) {
@@ -404,6 +425,7 @@ function NumberField({
           if (next !== null) onChange(next);
         }}
         min={min}
+        max={max}
         decimal={step !== "1"}
         required={required}
         className="mt-2 min-h-11 w-full rounded-xl border border-black/10 px-3"

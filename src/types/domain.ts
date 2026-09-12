@@ -4,7 +4,7 @@ export type ServiceType =
   "tour" | "airport_transfer" | "private_driver" | "custom_trip";
 export type PricingType = "per_car" | "per_person" | "fixed" | "custom";
 export type TourFormat = "private" | "group";
-export type CarType = "coupe" | "sedan" | "minivan" | "minibus" | "bus";
+export type CarType = "premier" | "sedan" | "minivan" | "minibus" | "bus";
 export type BookingStatus =
   | "pending"
   | "confirmed"

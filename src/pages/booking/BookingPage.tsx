@@ -6,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { NumericInput } from "@/components/ui/NumericInput";
+import {
+  PremierCarModal,
+  PremierCarSelection,
+} from "@/components/booking/PremierCarModal";
 import { carsQuery, toursQuery } from "@/features/catalog/api";
 import { bookingApi } from "@/features/bookings/api";
 import { bookingDraft } from "@/features/bookings/draft";
@@ -34,13 +38,16 @@ export function BookingPage() {
   const navigate = useNavigate();
   const draft = bookingDraft.get();
   const premium = params.get("vehicle") === "premium";
-  const requestedCarType = params.get("type");
-  const [selectedCarType, setSelectedCarType] = useState(
-    isCarType(requestedCarType) ? requestedCarType : "sedan",
-  );
   const requestedService = params.get("service") ?? draft?.service_type;
   const initialService: Extract<ServiceType, "tour" | "custom_trip"> =
     requestedService === "custom_trip" ? "custom_trip" : "tour";
+  const requestedCarType = params.get("type");
+  const initialCarType = premium
+    ? "premier"
+    : isCarType(requestedCarType)
+      ? requestedCarType
+      : "sedan";
+  const [selectedCarType, setSelectedCarType] = useState(initialCarType);
   const initialChoice: BookingChoice =
     initialService === "custom_trip" ? "custom_trip" : "group_tour";
   const serviceLocked = params.has("service") || Boolean(draft?.service_type);
@@ -50,7 +57,12 @@ export function BookingPage() {
     useState<BookingChoice>(initialChoice);
   const requestedCarId = Number(params.get("car") ?? draft?.car_id ?? 0);
   const [selectedCarId, setSelectedCarId] = useState(
-    Number.isInteger(requestedCarId) ? requestedCarId : 0,
+    Number.isInteger(requestedCarId) && requestedCarId > 0 ? requestedCarId : 0,
+  );
+  const [premierModalOpen, setPremierModalOpen] = useState(
+    initialService === "tour" &&
+      initialCarType === "premier" &&
+      requestedCarId <= 0,
   );
   const selectedPassengers = validPassengerCount(
     params.get("passengers") ??
@@ -94,24 +106,45 @@ export function BookingPage() {
       sort: "price_asc",
     }),
   );
+  const premierFleet = useQuery({
+    ...carsQuery({ type: "premier", per_page: 100, sort: "price_asc" }),
+    enabled: form.service === "tour",
+  });
   const availableTypes = useMemo(
-    () => new Set(cars.data?.data.map((car) => car.type) ?? []),
-    [cars.data],
+    () => {
+      const types = new Set(cars.data?.data.map((car) => car.type) ?? []);
+      if (premierFleet.data?.data.length) types.add("premier");
+
+      return types;
+    },
+    [cars.data, premierFleet.data],
   );
   const effectiveCarType =
-    !privateTour || !cars.data || availableTypes.has(selectedCarType)
+    selectedCarType === "premier" ||
+    !privateTour ||
+    !cars.data ||
+    availableTypes.has(selectedCarType)
       ? selectedCarType
       : (carTypes.find((type) => availableTypes.has(type)) ?? selectedCarType);
-  const eligibleCars = (cars.data?.data ?? []).filter((car) => {
+  const premierTour = privateTour && effectiveCarType === "premier";
+  const premierCars = premierFleet.data?.data ?? [];
+  const eligibleCars = (
+    premierTour ? premierCars : (cars.data?.data ?? [])
+  ).filter((car) => {
     if (group) return car.passenger_capacity >= form.passengers;
+    if (premierTour) return car.type === "premier";
     if (privateTour) return car.type === effectiveCarType;
     return true;
   });
   const effectivePassengers = form.passengers;
-  const automaticCarId =
-    eligibleCars.find((car) => car.id === selectedCarId)?.id ??
-    selectBestVehicleType(eligibleCars, form.passengers)?.id ??
-    0;
+  const explicitlySelectedCar = eligibleCars.find(
+    (car) => car.id === selectedCarId,
+  );
+  const automaticCarId = premierTour
+    ? (explicitlySelectedCar?.id ?? 0)
+    : (explicitlySelectedCar?.id ??
+      selectBestVehicleType(eligibleCars, form.passengers)?.id ??
+      0);
   const selectedCar = eligibleCars.find(
     (car) => car.id === automaticCarId,
   );
@@ -183,6 +216,11 @@ export function BookingPage() {
 
   async function review() {
     setError(null);
+    if (premierTour && !selectedCar) {
+      setError(t("premierCars.choose"));
+      setPremierModalOpen(true);
+      return;
+    }
     if (!journeyReady) {
       setError(
         t(
@@ -227,11 +265,13 @@ export function BookingPage() {
         ...(draft?.dropoff_address
           ? { dropoff_address: draft.dropoff_address }
           : {}),
-        ...(draft?.service_options || premium
+        ...(draft?.service_options || premium || premierTour
           ? {
               service_options: {
                 ...(draft?.service_options ?? {}),
-                ...(premium ? { vehicle_class: "premium" } : {}),
+                ...(premium || premierTour
+                  ? { vehicle_class: "premium" }
+                  : {}),
               },
             }
           : {}),
@@ -249,7 +289,8 @@ export function BookingPage() {
     t("booking.steps.review"),
   ];
   return (
-    <Container className="py-12 sm:py-20">
+    <>
+      <Container className="py-12 sm:py-20">
       <div className="mx-auto max-w-4xl">
         <p className="text-sm font-bold uppercase tracking-[.2em] text-apricot">
           {t("booking.secure")}
@@ -342,10 +383,11 @@ export function BookingPage() {
                   <select
                     value={effectiveCarType}
                     onChange={(event) => {
-                      setSelectedCarType(
-                        event.target.value as typeof selectedCarType,
-                      );
+                      const type = event.target.value as typeof selectedCarType;
+                      setSelectedCarType(type);
                       setSelectedCarId(0);
+                      estimate.reset();
+                      if (type === "premier") setPremierModalOpen(true);
                     }}
                     className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
                   >
@@ -355,11 +397,23 @@ export function BookingPage() {
                         value={type}
                         disabled={Boolean(cars.data && !availableTypes.has(type))}
                       >
-                        {type} · {carTypeCapacity[type]} {t("common.guests")}
+                        {type}
+                        {carTypeCapacity[type]
+                          ? ` · ${carTypeCapacity[type]} ${t("common.guests")}`
+                          : ""}
                       </option>
                     ))}
                   </select>
                 </label>
+              )}
+              {premierTour && (
+                <div className="sm:col-span-2">
+                  <PremierCarSelection
+                    car={selectedCar}
+                    onOpen={() => setPremierModalOpen(true)}
+                    nameOnly
+                  />
+                </div>
               )}
               <label
                 className={`min-w-0 text-sm font-semibold ${group ? "sm:col-span-2" : ""}`}
@@ -400,7 +454,7 @@ export function BookingPage() {
                   </label>
                 </>
               )}
-              {!group && premium && (
+              {!group && premium && !privateTour && (
                 <label className="text-sm font-semibold sm:col-span-2">
                   {t("customTrip.selectPremiumCar")}
                   <select
@@ -431,7 +485,9 @@ export function BookingPage() {
                         ? Math.min(selectedTour?.max_passengers ?? 20, 20)
                         : privateTour
                           ? Math.min(
-                              carTypeCapacity[effectiveCarType],
+                              premierTour
+                                ? (selectedCar?.passenger_capacity ?? 255)
+                                : (carTypeCapacity[effectiveCarType] ?? 255),
                               selectedTour?.max_passengers ?? 255,
                             )
                         : (selectedCar?.passenger_capacity ?? 255)
@@ -604,7 +660,9 @@ export function BookingPage() {
                       {t("booking.transport")}
                     </dt>
                     <dd className="mt-1 font-semibold capitalize">
-                      {estimate.data.car.type}
+                      {premierTour && selectedCar
+                        ? selectedCar.name
+                        : estimate.data.car.type}
                     </dd>
                   </div>
                 )}
@@ -672,6 +730,21 @@ export function BookingPage() {
           )}
         </div>
       </div>
-    </Container>
+      </Container>
+      <PremierCarModal
+        open={premierModalOpen && form.service === "tour"}
+        cars={premierCars}
+        selectedCarId={selectedCarId}
+        loading={premierFleet.isPending}
+        error={premierFleet.isError}
+        onSelect={(car) => {
+          setSelectedCarId(car.id);
+          setPremierModalOpen(false);
+          estimate.reset();
+        }}
+        onClose={() => setPremierModalOpen(false)}
+        onRetry={() => void premierFleet.refetch()}
+      />
+    </>
   );
 }
