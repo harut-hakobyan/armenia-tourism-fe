@@ -13,7 +13,7 @@ function car(id: number, capacity: number, pricePerKilometreMinor: number): Car 
     category: id === 1 ? "economy" : id === 2 ? "minivan" : "bus",
     type:
       capacity <= 3
-        ? "coupe"
+        ? "premier"
         : capacity <= 4
           ? "sedan"
           : capacity <= 6
