@@ -294,6 +294,11 @@ export function TourDetailsPage() {
                     <strong>{t("tourDetails.startTime")}</strong>{" "}
                     {item.start_time ?? t("common.toBeConfirmed")}
                   </p>
+                  <p className="flex items-center gap-2 text-sm">
+                    <Clock3 className="size-4 text-apricot" />
+                    <strong>{t("tourDetails.endTime")}</strong>{" "}
+                    {item.end_time ?? t("common.toBeConfirmed")}
+                  </p>
                   <p className="flex items-start gap-2 text-sm">
                     <MapPin className="mt-0.5 size-4 shrink-0 text-apricot" />
                     <span>
