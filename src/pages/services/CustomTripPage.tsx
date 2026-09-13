@@ -6,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { NumericInput } from "@/components/ui/NumericInput";
+import {
+  PremierCarModal,
+  PremierCarSelection,
+} from "@/components/booking/PremierCarModal";
 import { carsQuery, destinationsQuery } from "@/features/catalog/api";
 import { estimateApi } from "@/features/estimates/api";
 import { selectBestVehicleType } from "@/features/estimates/vehicle-allocation";
@@ -33,9 +37,10 @@ export function CustomTripPage() {
   const [passengers, setPassengers] = useState(2);
   const [selectedVehicleType, setSelectedVehicleType] = useState<CarType | "">("");
   const [promoCode, setPromoCode] = useState("");
-  const [premiumCarId, setPremiumCarId] = useState(
+  const [selectedPremierCarId, setSelectedPremierCarId] = useState(
     Number.isInteger(requestedPremiumCarId) ? requestedPremiumCarId : 0,
   );
+  const [premierModalOpen, setPremierModalOpen] = useState(false);
   const cars = useQuery(
     carsQuery({
       ...(premium ? { category: "premium" as const } : {}),
@@ -43,19 +48,22 @@ export function CustomTripPage() {
       per_page: 30,
     }),
   );
+  const fleet = cars.data?.data ?? [];
+  const premierCars = fleet.filter((car) => car.type === "premier");
+  const premierSelected = premium || selectedVehicleType === "premier";
   const recommendedCar = selectBestVehicleType(
-    cars.data?.data ?? [],
+    fleet.filter((car) => car.type !== "premier"),
     passengers,
   );
   const availableVehicleTypes = Array.from(
     new Set(cars.data?.data.map((car) => car.type) ?? []),
   );
-  const selectedCar = premium
-    ? (cars.data?.data.find((car) => car.id === premiumCarId) ?? recommendedCar)
-    : (cars.data?.data.find((car) => car.type === selectedVehicleType) ??
+  const selectedCar = premierSelected
+    ? premierCars.find((car) => car.id === selectedPremierCarId)
+    : (fleet.find((car) => car.type === selectedVehicleType) ??
       recommendedCar);
-  const premiumCapacityExceeded = Boolean(
-    premium && selectedCar && passengers > selectedCar.passenger_capacity,
+  const premierCapacityExceeded = Boolean(
+    premierSelected && selectedCar && passengers > selectedCar.passenger_capacity,
   );
   const automaticCarId = selectedCar?.id ?? 0;
   const points = () => [
@@ -74,7 +82,7 @@ export function CustomTripPage() {
         passengers,
         route_points: points(),
         ...(promoCode.trim() ? { promo_code: promoCode.trim().toUpperCase() } : {}),
-        ...(premium ? { premium_class: true } : {}),
+        ...(premierSelected ? { premium_class: true } : {}),
       }),
   });
 
@@ -101,7 +109,7 @@ export function CustomTripPage() {
       estimate: estimate.data,
       service_options: {
         return_to_yerevan: true,
-        ...(premium ? { vehicle_class: "premium" } : {}),
+        ...(premierSelected ? { vehicle_class: "premium" } : {}),
       },
     });
     void navigate("/booking?service=custom_trip");
@@ -189,32 +197,12 @@ export function CustomTripPage() {
         </div>
         <aside className="rounded-3xl bg-white p-6 shadow-soft">
           <h2 className="text-xl font-bold">{t("customTrip.estimate")}</h2>
-          {premium && cars.data?.data.length ? (
-            <label className="mt-5 block text-sm font-semibold">
-              {t("customTrip.selectPremiumCar")}
-              <select
-                value={selectedCar?.id ?? ""}
-                onChange={(event) => {
-                  const carId = Number(event.target.value);
-                  setPremiumCarId(carId);
-                  estimate.reset();
-                }}
-                className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4"
-              >
-                {cars.data.data.map((car) => (
-                  <option key={car.id} value={car.id}>
-                    {car.name} · {car.passenger_capacity} {t("common.guests")}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
           <label className="mt-5 block text-sm font-semibold">
             {t("customTrip.passengers")}
             <NumericInput
               required
               min={1}
-              max={premium ? (selectedCar?.passenger_capacity ?? 255) : 255}
+              max={premierSelected ? (selectedCar?.passenger_capacity ?? 255) : 255}
               value={passengers}
               onValueChange={(value) => {
                 if (value !== null) {
@@ -245,6 +233,15 @@ export function CustomTripPage() {
               </select>
             </label>
           )}
+          {premierSelected && (
+            <div className="mt-5">
+              <PremierCarSelection
+                car={selectedCar}
+                onOpen={() => setPremierModalOpen(true)}
+                nameOnly
+              />
+            </div>
+          )}
           <label className="mt-5 block text-sm font-semibold">
             {t("booking.promoCode")}
             <input
@@ -258,7 +255,7 @@ export function CustomTripPage() {
               className="mt-2 min-h-12 w-full rounded-xl border border-black/10 px-4 uppercase"
             />
           </label>
-          {premiumCapacityExceeded && selectedCar && (
+          {premierCapacityExceeded && selectedCar && (
             <p className="mt-2 text-sm text-danger">
               {t("customTrip.passengerCapacityExceeded", {
                 count: selectedCar.passenger_capacity,
@@ -266,17 +263,17 @@ export function CustomTripPage() {
             </p>
           )}
           <div
-            className={`mt-4 rounded-2xl p-4 text-sm ${premium ? "bg-forest text-white" : "bg-stone"}`}
+            className={`mt-4 rounded-2xl p-4 text-sm ${premierSelected ? "bg-forest text-white" : "bg-stone"}`}
           >
-            {premium && <Crown className="mb-2 size-5 text-[#d8bc87]" />}
+            {premierSelected && <Crown className="mb-2 size-5 text-[#d8bc87]" />}
             <strong>{t("customTrip.transport")}</strong>{" "}
-            {premium
+            {premierSelected
               ? selectedCar
                 ? selectedCar.name
                 : t("customTrip.searchingPremium")
               : t("customTrip.automaticVehicle")}
           </div>
-          {premium && !cars.isPending && !selectedCar && (
+          {premierSelected && !cars.isPending && premierCars.length === 0 && (
             <p className="mt-3 text-sm text-danger">
               {t("customTrip.noPremium")}
             </p>
@@ -285,7 +282,7 @@ export function CustomTripPage() {
             disabled={
               !automaticCarId ||
               selected.length < 1 ||
-              premiumCapacityExceeded ||
+              premierCapacityExceeded ||
               estimate.isPending
             }
             onClick={() => estimate.mutate()}
@@ -332,6 +329,20 @@ export function CustomTripPage() {
           )}
         </aside>
       </div>
+      <PremierCarModal
+        open={premierModalOpen}
+        cars={premierCars}
+        selectedCarId={selectedPremierCarId}
+        loading={cars.isPending}
+        error={cars.isError}
+        onSelect={(car) => {
+          setSelectedPremierCarId(car.id);
+          setPremierModalOpen(false);
+          estimate.reset();
+        }}
+        onClose={() => setPremierModalOpen(false)}
+        onRetry={() => void cars.refetch()}
+      />
     </Container>
   );
 }
