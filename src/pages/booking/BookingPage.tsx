@@ -59,11 +59,7 @@ export function BookingPage() {
   const [selectedCarId, setSelectedCarId] = useState(
     Number.isInteger(requestedCarId) && requestedCarId > 0 ? requestedCarId : 0,
   );
-  const [premierModalOpen, setPremierModalOpen] = useState(
-    initialService === "tour" &&
-      initialCarType === "premier" &&
-      requestedCarId <= 0,
-  );
+  const [premierModalOpen, setPremierModalOpen] = useState(false);
   const selectedPassengers = validPassengerCount(
     params.get("passengers") ??
       draft?.passengers ??
@@ -218,7 +214,6 @@ export function BookingPage() {
     setError(null);
     if (premierTour && !selectedCar) {
       setError(t("premierCars.choose"));
-      setPremierModalOpen(true);
       return;
     }
     if (!journeyReady) {
@@ -387,7 +382,6 @@ export function BookingPage() {
                       setSelectedCarType(type);
                       setSelectedCarId(0);
                       estimate.reset();
-                      if (type === "premier") setPremierModalOpen(true);
                     }}
                     className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
                   >
@@ -527,8 +521,13 @@ export function BookingPage() {
                     {selectedTour.end_time ?? t("common.toBeConfirmed")}
                   </div>
                   <div className="rounded-2xl bg-stone p-4 text-sm">
-                    <strong>{t("booking.meetingPlace")}</strong>{" "}
-                    {effectivePickup || t("common.toBeConfirmed")}
+                    <div>
+                      <strong>{t("booking.meetingPlace")}</strong>{" "}
+                      {effectivePickup || t("common.toBeConfirmed")}
+                    </div>
+                    <p className="mt-1 text-xs text-ink/50">
+                      {t("booking.meetingPlaceNotice")}
+                    </p>
                   </div>
                 </div>
               )}
@@ -673,12 +672,24 @@ export function BookingPage() {
                     </dd>
                   </div>
                 )}
-                <div>
-                  <dt className="text-xs uppercase text-ink/45">
-                    {t(group ? "booking.meetingPlace" : "booking.pickup")}
-                  </dt>
-                  <dd className="mt-1 font-semibold">{effectivePickup}</dd>
-                </div>
+                {group ? (
+                  <div>
+                    <dt className="text-xs uppercase text-ink/45">
+                      {t("booking.meetingPlace")}
+                    </dt>
+                    <dd className="mt-1 font-semibold">{effectivePickup}</dd>
+                    <p className="mt-1 text-xs text-ink/50">
+                      {t("booking.meetingPlaceNotice")}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <dt className="text-xs uppercase text-ink/45">
+                      {t("booking.pickup")}
+                    </dt>
+                    <dd className="mt-1 font-semibold">{effectivePickup}</dd>
+                  </div>
+                )}
                 {estimate.data.price.promo_code && (
                   <div>
                     <dt className="text-xs uppercase text-ink/45">

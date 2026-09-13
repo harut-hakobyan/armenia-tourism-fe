@@ -90,9 +90,7 @@ export function TourDetailsPage() {
   const [selectedPremierCarId, setSelectedPremierCarId] = useState(
     Number.isInteger(requestedCarId) && requestedCarId > 0 ? requestedCarId : 0,
   );
-  const [premierModalOpen, setPremierModalOpen] = useState(
-    initialCarType === "premier" && selectedPremierCarId === 0,
-  );
+  const [premierModalOpen, setPremierModalOpen] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const { i18n, t } = useTranslation();
   const tour = useQuery(tourQuery(i18n.language, slug));
@@ -302,8 +300,13 @@ export function TourDetailsPage() {
                   <p className="flex items-start gap-2 text-sm">
                     <MapPin className="mt-0.5 size-4 shrink-0 text-apricot" />
                     <span>
-                      <strong>{t("tourDetails.meetingPlace")}</strong>{" "}
-                      {item.meeting_point ?? t("common.toBeConfirmed")}
+                      <span>
+                        <strong>{t("tourDetails.meetingPlace")}</strong>{" "}
+                        {item.meeting_point ?? t("common.toBeConfirmed")}
+                      </span>
+                      <span className="mt-1 block text-xs text-ink/50">
+                        {t("tourDetails.meetingPlaceNotice")}
+                      </span>
                     </span>
                   </p>
                 </div>
@@ -324,7 +327,6 @@ export function TourDetailsPage() {
                     onChange={(event) => {
                       const type = event.target.value as typeof selectedCarType;
                       setSelectedCarType(type);
-                      if (type === "premier") setPremierModalOpen(true);
                     }}
                     className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
                   >
