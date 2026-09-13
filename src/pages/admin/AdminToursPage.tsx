@@ -31,13 +31,13 @@ function fromTour(tour:AdminTour):TourForm {
   for(const price of tour.car_type_prices??[])car_type_prices[price.type]=fromMinorUnits(price.price_minor,tour.currency)
   return {...tour, car_type_prices, itinerary:(tour.itinerary??[]).map(({destination_id,day_number,duration_minutes,optional,notes})=>({destination_id,day_number,duration_minutes,optional,notes})), starting_price:fromMinorUnits(tour.starting_price_minor,tour.currency), translations:emptyTranslations().map((empty) => {
     const translation=tour.translations.find((item) => item.locale===empty.locale)
-    return {...empty, label:translation?.title??'', short_description:translation?.short_description??'', description:translation?.description??'', seo_title:translation?.seo_title??'', seo_description:translation?.seo_description??''}
+    return {...empty, label:translation?.title??'', short_description:translation?.short_description??'', description:translation?.description??'', inclusions:(translation?.inclusions??[]).join('\n'), exclusions:(translation?.exclusions??[]).join('\n'), seo_title:translation?.seo_title??'', seo_description:translation?.seo_description??''}
   })}
 }
 
 function payload(form:TourForm):TourAdminInput {
   const {starting_price,car_type_prices,translations,...fields}=form
-  return {...fields,pricing_type:form.format==='private'?'per_car':form.pricing_type,starting_price_minor:toMinorUnits(starting_price,form.currency),...(form.format==='private'?{car_type_prices:carTypes.map((type)=>({type,price_minor:toMinorUnits(car_type_prices[type],form.currency)}))}:{}),translations:translations.map(({label,...translation})=>({...translation,title:label,short_description:translation.short_description||null,description:translation.description||null,seo_title:translation.seo_title||null,seo_description:translation.seo_description||null}))}
+  return {...fields,pricing_type:form.format==='private'?'per_car':form.pricing_type,starting_price_minor:toMinorUnits(starting_price,form.currency),...(form.format==='private'?{car_type_prices:carTypes.map((type)=>({type,price_minor:toMinorUnits(car_type_prices[type],form.currency)}))}:{}),translations:translations.map(({label,...translation})=>({...translation,title:label,short_description:translation.short_description||null,description:translation.description||null,inclusions:translation.inclusions.split('\n').map((item)=>item.trim()).filter(Boolean),exclusions:translation.exclusions.split('\n').map((item)=>item.trim()).filter(Boolean),seo_title:translation.seo_title||null,seo_description:translation.seo_description||null}))}
 }
 
 function title(tour:AdminTour){return tour.translations.find((translation)=>translation.locale==='en')?.title??tour.slug}

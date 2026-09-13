@@ -22,6 +22,7 @@ export function TourGallerySlideshow({
   const [active, setActive] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const pointerStart = useRef<number | null>(null);
+  const thumbnailStripRef = useRef<HTMLDivElement>(null);
   const thumbnailRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const imageCount = images.length;
@@ -69,10 +70,15 @@ export function TourGallerySlideshow({
   });
 
   useEffect(() => {
-    thumbnailRefs.current[visibleActive]?.scrollIntoView({
+    const strip = thumbnailStripRef.current;
+    const thumbnail = thumbnailRefs.current[visibleActive];
+    if (!strip || !thumbnail) return;
+
+    strip.scrollTo({
       behavior: "smooth",
-      block: "nearest",
-      inline: "center",
+      left:
+        thumbnail.offsetLeft -
+        (strip.clientWidth - thumbnail.clientWidth) / 2,
     });
   }, [visibleActive]);
 
@@ -127,7 +133,10 @@ export function TourGallerySlideshow({
         </div>
 
         {imageCount > 1 && (
-          <div className="flex w-full min-w-0 max-w-full gap-3 overflow-x-auto overscroll-x-contain p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div
+            ref={thumbnailStripRef}
+            className="flex w-full min-w-0 max-w-full gap-3 overflow-x-auto overscroll-x-contain p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {images.map((image, index) => (
               <button
                 key={image.id}
