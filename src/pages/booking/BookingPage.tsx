@@ -59,11 +59,7 @@ export function BookingPage() {
   const [selectedCarId, setSelectedCarId] = useState(
     Number.isInteger(requestedCarId) && requestedCarId > 0 ? requestedCarId : 0,
   );
-  const [premierModalOpen, setPremierModalOpen] = useState(
-    initialService === "tour" &&
-      initialCarType === "premier" &&
-      requestedCarId <= 0,
-  );
+  const [premierModalOpen, setPremierModalOpen] = useState(false);
   const selectedPassengers = validPassengerCount(
     params.get("passengers") ??
       draft?.passengers ??
@@ -218,7 +214,6 @@ export function BookingPage() {
     setError(null);
     if (premierTour && !selectedCar) {
       setError(t("premierCars.choose"));
-      setPremierModalOpen(true);
       return;
     }
     if (!journeyReady) {
@@ -387,7 +382,6 @@ export function BookingPage() {
                       setSelectedCarType(type);
                       setSelectedCarId(0);
                       estimate.reset();
-                      if (type === "premier") setPremierModalOpen(true);
                     }}
                     className="mt-2 min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 capitalize"
                   >
