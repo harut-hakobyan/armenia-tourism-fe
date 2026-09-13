@@ -16,6 +16,10 @@ export function TranslationFields({ noun, value, onChange }: { noun: 'Tour title
         <TextArea label="Short description" value={translation.short_description} onChange={(next) => field(translation.locale, 'short_description', next)} />
         <TextArea label="SEO description" value={translation.seo_description} onChange={(next) => field(translation.locale, 'seo_description', next)} />
         <div className="sm:col-span-2"><TextArea label="Full description" value={translation.description} onChange={(next) => field(translation.locale, 'description', next)} rows={5} /></div>
+        {noun === 'Tour title' && <>
+          <TextArea label="Inclusions (one per line)" value={translation.inclusions} onChange={(next) => field(translation.locale, 'inclusions', next)} rows={5} />
+          <TextArea label="Exclusions (one per line)" value={translation.exclusions} onChange={(next) => field(translation.locale, 'exclusions', next)} rows={5} />
+        </>}
       </div>
     </section>)}
   </div>
