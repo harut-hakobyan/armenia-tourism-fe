@@ -81,6 +81,8 @@ export interface Tour {
   title: string;
   short_description: string | null;
   description: string | null;
+  inclusions: string[];
+  exclusions: string[];
   category: TourCategory | null;
   duration_minutes: number;
   approximate_distance_km: number | null;

@@ -152,7 +152,13 @@ export interface TourAdminInput {
   dropoff_available: boolean;
   free_cancellation_hours: number;
   sort_order: number;
-  translations: Array<AdminTranslation & { title: string }>;
+  translations: Array<
+    AdminTranslation & {
+      title: string;
+      inclusions: string[] | null;
+      exclusions: string[] | null;
+    }
+  >;
   itinerary: TourItineraryInput[];
   car_type_prices?: Array<{ type: CarType; price_minor: number }>;
 }

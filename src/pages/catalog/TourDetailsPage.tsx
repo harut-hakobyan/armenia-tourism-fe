@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Check, Clock3, MapPin, Route, UsersRound } from "lucide-react";
+import { Check, Clock3, MapPin, Route, UsersRound, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -210,6 +210,45 @@ export function TourDetailsPage() {
         <div className="min-w-0">
           <h2 className="text-display text-4xl">{t("tourDetails.journey")}</h2>
           <TourDescription description={item.description} />
+          {(item.inclusions.length > 0 || item.exclusions.length > 0) && (
+            <section className="mt-14">
+              <h2 className="text-display text-4xl">
+                {t("tourDetails.inclusionsAndExclusions")}
+              </h2>
+              <div className="mt-8 grid gap-6 sm:grid-cols-2">
+                {item.inclusions.length > 0 && (
+                  <div className="rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-forest">
+                      {t("tourDetails.inclusions")}
+                    </h3>
+                    <ul className="mt-4 space-y-3">
+                      {item.inclusions.map((inclusion) => (
+                        <li className="flex gap-3 text-sm text-ink/70" key={inclusion}>
+                          <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                          <span>{inclusion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {item.exclusions.length > 0 && (
+                  <div className="rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-ink">
+                      {t("tourDetails.exclusions")}
+                    </h3>
+                    <ul className="mt-4 space-y-3">
+                      {item.exclusions.map((exclusion) => (
+                        <li className="flex gap-3 text-sm text-ink/70" key={exclusion}>
+                          <X className="mt-0.5 size-4 shrink-0 text-danger" />
+                          <span>{exclusion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
           <h2 className="text-display mt-14 text-4xl">
             {t("tourDetails.itinerary")}
           </h2>
