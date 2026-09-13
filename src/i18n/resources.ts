@@ -130,6 +130,8 @@ const en = {
     startTime: "Start time:",
     endTime: "End time:",
     meetingPlace: "Meeting place:",
+    meetingPlaceNotice:
+      "Our manager will contact you before the tour to confirm the exact meeting location.",
     bookGroup: "Book group tour",
     hotelPickup: "Hotel pickup available",
     freeCancellation: "Free cancellation up to {{count}}h",
@@ -209,6 +211,8 @@ const en = {
     startTime: "Start time:",
     endTime: "End time:",
     meetingPlace: "Meeting place:",
+    meetingPlaceNotice:
+      "Our manager will contact you before the tour to confirm the exact meeting location.",
     continue: "Continue",
     meetingPoint: "Meeting point",
     pickupAddress: "Pickup address",
@@ -444,6 +448,8 @@ const ru = {
     startTime: "Время начала:",
     endTime: "Время окончания:",
     meetingPlace: "Место встречи:",
+    meetingPlaceNotice:
+      "Наш менеджер свяжется с вами перед туром, чтобы подтвердить точное место встречи.",
     bookGroup: "Забронировать групповой тур",
     hotelPickup: "Трансфер из отеля",
     freeCancellation: "Бесплатная отмена за {{count}} ч.",
@@ -523,6 +529,8 @@ const ru = {
     startTime: "Время начала:",
     endTime: "Время окончания:",
     meetingPlace: "Место встречи:",
+    meetingPlaceNotice:
+      "Наш менеджер свяжется с вами перед туром, чтобы подтвердить точное место встречи.",
     continue: "Продолжить",
     meetingPoint: "Место встречи",
     pickupAddress: "Адрес встречи",
@@ -755,6 +763,8 @@ const hy = {
     startTime: "Մեկնարկի ժամը՝",
     endTime: "Ավարտի ժամը՝",
     meetingPlace: "Հանդիպման վայրը՝",
+    meetingPlaceNotice:
+      "Մեր մենեջերը կկապվի ձեզ հետ շրջագայությունից առաջ՝ հանդիպման ճշգրիտ վայրը հաստատելու համար։",
     bookGroup: "Ամրագրել խմբային տուրը",
     hotelPickup: "Վերցնել հյուրանոցից",
     freeCancellation: "Անվճար չեղարկում՝ մինչև {{count}} ժամ",
@@ -831,6 +841,8 @@ const hy = {
     startTime: "Մեկնարկի ժամը՝",
     endTime: "Ավարտի ժամը՝",
     meetingPlace: "Հանդիպման վայրը՝",
+    meetingPlaceNotice:
+      "Մեր մենեջերը կկապվի ձեզ հետ շրջագայությունից առաջ՝ հանդիպման ճշգրիտ վայրը հաստատելու համար։",
     continue: "Շարունակել",
     meetingPoint: "Հանդիպման վայր",
     pickupAddress: "Վերցնելու հասցե",
