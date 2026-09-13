@@ -521,8 +521,13 @@ export function BookingPage() {
                     {selectedTour.end_time ?? t("common.toBeConfirmed")}
                   </div>
                   <div className="rounded-2xl bg-stone p-4 text-sm">
-                    <strong>{t("booking.meetingPlace")}</strong>{" "}
-                    {effectivePickup || t("common.toBeConfirmed")}
+                    <div>
+                      <strong>{t("booking.meetingPlace")}</strong>{" "}
+                      {effectivePickup || t("common.toBeConfirmed")}
+                    </div>
+                    <p className="mt-1 text-xs text-ink/50">
+                      {t("booking.meetingPlaceNotice")}
+                    </p>
                   </div>
                 </div>
               )}
@@ -667,12 +672,24 @@ export function BookingPage() {
                     </dd>
                   </div>
                 )}
-                <div>
-                  <dt className="text-xs uppercase text-ink/45">
-                    {t(group ? "booking.meetingPlace" : "booking.pickup")}
-                  </dt>
-                  <dd className="mt-1 font-semibold">{effectivePickup}</dd>
-                </div>
+                {group ? (
+                  <div>
+                    <dt className="text-xs uppercase text-ink/45">
+                      {t("booking.meetingPlace")}
+                    </dt>
+                    <dd className="mt-1 font-semibold">{effectivePickup}</dd>
+                    <p className="mt-1 text-xs text-ink/50">
+                      {t("booking.meetingPlaceNotice")}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <dt className="text-xs uppercase text-ink/45">
+                      {t("booking.pickup")}
+                    </dt>
+                    <dd className="mt-1 font-semibold">{effectivePickup}</dd>
+                  </div>
+                )}
                 {estimate.data.price.promo_code && (
                   <div>
                     <dt className="text-xs uppercase text-ink/45">

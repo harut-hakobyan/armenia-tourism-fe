@@ -300,8 +300,13 @@ export function TourDetailsPage() {
                   <p className="flex items-start gap-2 text-sm">
                     <MapPin className="mt-0.5 size-4 shrink-0 text-apricot" />
                     <span>
-                      <strong>{t("tourDetails.meetingPlace")}</strong>{" "}
-                      {item.meeting_point ?? t("common.toBeConfirmed")}
+                      <span>
+                        <strong>{t("tourDetails.meetingPlace")}</strong>{" "}
+                        {item.meeting_point ?? t("common.toBeConfirmed")}
+                      </span>
+                      <span className="mt-1 block text-xs text-ink/50">
+                        {t("tourDetails.meetingPlaceNotice")}
+                      </span>
                     </span>
                   </p>
                 </div>
