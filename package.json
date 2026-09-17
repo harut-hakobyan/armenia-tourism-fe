@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "next dev next-app",
     "dev:next": "next dev next-app",
-    "build": "next build next-app",
-    "build:next": "next build next-app",
+    "build": "next build next-app --webpack",
+    "build:next": "next build next-app --webpack",
     "lint": "eslint .",
     "typecheck": "tsc -p next-app/tsconfig.json --pretty false",
     "test": "vitest run",
