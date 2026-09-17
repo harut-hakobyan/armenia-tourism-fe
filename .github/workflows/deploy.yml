@@ -31,17 +31,26 @@ jobs:
             git fetch origin
             git reset --hard origin/master
 
-            docker build \
-              --build-arg VITE_API_BASE_URL=https://api.tour-armenia.com/api/v1 \
-              -t armenia-tourism-fe:production .
+            cd ../armenia-tourism-be
 
-            docker rm -f armenia-tourism-frontend 2>/dev/null || true
+            docker compose build frontend
 
-            docker run -d \
-              --name armenia-tourism-frontend \
-              --restart unless-stopped \
-              -p 127.0.0.1:8090:80 \
-              armenia-tourism-fe:production
+            if ! docker compose up -d --wait --wait-timeout 180 \
+              --no-deps \
+              --force-recreate \
+              frontend; then
+              docker compose ps
+              docker compose logs --tail=200 frontend nginx
+              docker inspect --format '{{json .State.Health}}' armenia-tourism-be-frontend-1 || true
+              exit 1
+            fi
+
+            docker compose exec -T nginx nginx -s reload
+
+            NGINX_ENDPOINT="$(docker compose port nginx 80)"
+            test -n "$NGINX_ENDPOINT"
+            curl --fail --silent --show-error --retry 10 --retry-delay 3 \
+              "http://${NGINX_ENDPOINT}/robots.txt" >/dev/null
 
             docker image prune -f
 
@@ -67,16 +76,25 @@ jobs:
             git fetch origin
             git reset --hard origin/staging
 
-            docker build \
-              --build-arg VITE_API_BASE_URL=https://api-tourism.cardismantler.cc/api/v1 \
-              -t armenia-tourism-fe:staging .
+            cd ../armenia-tourism-be
 
-            docker rm -f armenia-tourism-frontend 2>/dev/null || true
+            docker compose build frontend
 
-            docker run -d \
-              --name armenia-tourism-frontend \
-              --restart unless-stopped \
-              -p 127.0.0.1:8090:80 \
-              armenia-tourism-fe:staging
+            if ! docker compose up -d --wait --wait-timeout 180 \
+              --no-deps \
+              --force-recreate \
+              frontend; then
+              docker compose ps
+              docker compose logs --tail=200 frontend nginx
+              docker inspect --format '{{json .State.Health}}' armenia-tourism-be-frontend-1 || true
+              exit 1
+            fi
+
+            docker compose exec -T nginx nginx -s reload
+
+            NGINX_ENDPOINT="$(docker compose port nginx 80)"
+            test -n "$NGINX_ENDPOINT"
+            curl --fail --silent --show-error --retry 10 --retry-delay 3 \
+              "http://${NGINX_ENDPOINT}/robots.txt" >/dev/null
 
             docker image prune -f
