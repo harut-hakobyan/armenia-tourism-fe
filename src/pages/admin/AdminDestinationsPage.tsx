@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ImagePlus, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/lib/navigation'
 import { Button } from '@/components/ui/Button'
 import { adminApi, type AdminDestination, type DestinationAdminInput } from '@/features/admin/api'
 import { toApiError } from '@/lib/api-client'

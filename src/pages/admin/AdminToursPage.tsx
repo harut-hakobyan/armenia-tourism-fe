@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Copy, ImagePlus, Pencil, Plus, Trash2, Video } from 'lucide-react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from '@/lib/navigation'
 import { Button } from '@/components/ui/Button'
 import { adminApi, type AdminTour, type TourAdminInput, type TourItineraryInput } from '@/features/admin/api'
 import { carTypes } from '@/features/cars/types'

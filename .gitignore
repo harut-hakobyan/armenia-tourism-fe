@@ -1,5 +1,7 @@
 node_modules
 dist
+.next
+next-app/.next
 .env
 .env.local
 .idea

@@ -1,5 +1,5 @@
 import { ArrowUpRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import type { Destination } from '@/types/domain'
 
 export function DestinationCard({ destination }: { destination: Destination }) {

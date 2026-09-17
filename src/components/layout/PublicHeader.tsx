@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Menu, Mountain, X } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from '@/lib/navigation'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { buttonStyles } from '@/components/ui/button-styles'
@@ -26,7 +26,7 @@ export function PublicHeader() {
       <div className="flex items-center gap-2">
         <LanguageSelector />
         <NavLink to="/booking" className={cn(buttonStyles(), 'hidden sm:inline-flex')}>{t('actions.book')}</NavLink>
-        <button className="grid size-11 place-items-center rounded-full text-forest lg:hidden" aria-label={t('common.menu')} aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? <X /> : <Menu />}</button>
+        <button type="button" className="grid size-11 place-items-center rounded-full text-forest lg:hidden" aria-label={t('common.menu')} aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? <X /> : <Menu />}</button>
       </div>
     </Container>
     {open && <nav className="border-t border-forest/8 bg-mist px-5 py-5 lg:hidden" aria-label="Mobile">

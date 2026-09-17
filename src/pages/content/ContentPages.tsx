@@ -69,7 +69,7 @@ export function ContactPage() {
   const contact = useMutation({ mutationFn: contentApi.contact });
   const number =
     settings.data?.whatsapp_number ??
-    import.meta.env.VITE_WHATSAPP_NUMBER ??
+    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ??
     "37499123456";
 
   return (

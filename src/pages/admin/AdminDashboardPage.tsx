@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { CalendarDays, CheckCircle2, Clock3, WalletCards } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import { adminApi } from '@/features/admin/api'
 import { formatMoney } from '@/lib/money'
 import { QueryError } from '@/components/ui/QueryState'

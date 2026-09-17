@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from '@/lib/navigation'
 import { useTranslation } from 'react-i18next'
 import { Container } from '@/components/ui/Container'
 import { PageLoader } from '@/components/ui/PageLoader'

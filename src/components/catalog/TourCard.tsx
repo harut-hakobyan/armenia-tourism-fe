@@ -1,5 +1,5 @@
 import { ArrowUpRight, Clock3, Route } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import { useTranslation } from 'react-i18next'
 import type { Tour } from '@/types/domain'
 import { formatMoney } from '@/lib/money'

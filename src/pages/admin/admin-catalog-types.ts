@@ -1,4 +1,4 @@
-export type CatalogLocale = 'en' | 'ru' | 'hy'
+export type CatalogLocale = 'en' | 'ru' | 'hy' | 'fa'
 
 export interface LocalizedContent {
   locale: CatalogLocale
@@ -11,6 +11,6 @@ export interface LocalizedContent {
   seo_description: string
 }
 
-export const emptyTranslations = (): LocalizedContent[] => (['en', 'ru', 'hy'] as const).map((locale) => ({
+export const emptyTranslations = (): LocalizedContent[] => (['en', 'ru', 'hy', 'fa'] as const).map((locale) => ({
   locale, label: '', short_description: '', description: '', inclusions: '', exclusions: '', seo_title: '', seo_description: '',
 }))

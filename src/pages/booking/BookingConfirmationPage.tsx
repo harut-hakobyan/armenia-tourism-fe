@@ -1,15 +1,18 @@
 import { CheckCircle2 } from "lucide-react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useHydrated, useLocation } from "@/lib/navigation";
 import { useTranslation } from "react-i18next";
 import { QrTicket } from "@/components/booking/QrTicket";
 import { Container } from "@/components/ui/Container";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { buttonStyles } from "@/components/ui/button-styles";
 import type { CreatedBooking } from "@/types/domain";
 
 export function BookingConfirmationPage() {
   const { t } = useTranslation();
+  const ready = useHydrated();
   const state = useLocation().state as { booking?: CreatedBooking } | null;
   const booking = state?.booking;
+  if (!ready) return <PageLoader />;
   if (!booking) return <Navigate to="/booking" replace />;
   const qrPayload = booking.qr_payload;
   const attendanceStatus = booking.attendance?.status ?? "expected";

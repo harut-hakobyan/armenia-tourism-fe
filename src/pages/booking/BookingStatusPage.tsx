@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams } from "@/lib/navigation";
 import { useTranslation } from "react-i18next";
 import { QrTicket } from "@/components/booking/QrTicket";
 import { Container } from "@/components/ui/Container";

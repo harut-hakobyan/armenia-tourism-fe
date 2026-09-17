@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/lib/navigation'
 import { StatusBadge } from '@/components/operations/StatusBadge'
 import { Button } from '@/components/ui/Button'
 import { adminApi } from '@/features/admin/api'
 import { toApiError } from '@/lib/api-client'
 import { formatMoney } from '@/lib/money'
 
-const assignmentEnabled = import.meta.env.VITE_BOOKING_ASSIGNMENT_ENABLED === 'true'
+const assignmentEnabled = process.env.NEXT_PUBLIC_BOOKING_ASSIGNMENT_ENABLED === 'true'
 
 export function AdminBookingDetailsPage() {
   const id = Number(useParams().id)
@@ -35,7 +35,7 @@ export function AdminBookingDetailsPage() {
   const compatibleDrivers = availability.data?.drivers.filter((item) => !car || item.car_ids.includes(car)) ?? []
 
   return <div>
-    <button onClick={() => void navigate(-1)} className="text-sm font-bold text-forest">← Back</button>
+    <button type="button" onClick={() => void navigate(-1)} className="text-sm font-bold text-forest">← Back</button>
     <div className="mt-5 flex flex-wrap items-center justify-between gap-4"><div><p className="text-sm text-ink/45">{current.booking_number}</p><h1 className="text-3xl font-bold">{current.customer.name}</h1></div><StatusBadge status={current.booking_status} /></div>
     <div className="mt-7 grid gap-6 xl:grid-cols-[1fr_360px]">
       <div className="space-y-6">
