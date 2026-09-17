@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { toApiError } from "@/lib/api-client";
 import { formatMoney } from "@/lib/money";
+import { ImageCompressionCheckbox } from "./ImageCompressionCheckbox";
 
 type CarForm = CarAdminInput;
 
@@ -69,6 +70,7 @@ export function AdminCarsPage() {
   const [form, setForm] = useState<CarForm>(emptyForm);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [compressImages, setCompressImages] = useState(true);
   const refresh = async () =>
     client.invalidateQueries({ queryKey: ["admin", "directory", "cars"] });
   const save = useMutation({
@@ -100,8 +102,8 @@ export function AdminCarsPage() {
     onError: (reason) => setError(toApiError(reason).message),
   });
   const upload = useMutation({
-    mutationFn: ({ id, file }: { id: number; file: File }) =>
-      adminApi.uploadMedia("cars", id, file, "cover"),
+    mutationFn: ({ id, file, compress }: { id: number; file: File; compress: boolean }) =>
+      adminApi.uploadMedia("cars", id, file, "cover", undefined, compress),
     onSuccess: refresh,
     onError: (reason) => setError(toApiError(reason).message),
   });
@@ -323,6 +325,7 @@ export function AdminCarsPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              <ImageCompressionCheckbox checked={compressImages} onChange={setCompressImages} />
               <label className="cursor-pointer rounded-full bg-black/5 px-3 py-2 text-xs font-bold text-ink/60">
                 {item.cover_image ? "Change image" : "Add image"}
                 <input
@@ -331,7 +334,7 @@ export function AdminCarsPage() {
                   className="hidden"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
-                    if (file) upload.mutate({ id: item.id, file });
+                    if (file) upload.mutate({ id: item.id, file, compress: compressImages });
                     event.target.value = "";
                   }}
                 />
