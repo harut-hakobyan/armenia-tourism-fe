@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Crown, MapPin, Trash2 } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/navigation";
 import { useTranslation } from "react-i18next";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
@@ -91,7 +91,7 @@ export function CustomTripPage() {
       const next = [...items];
       const target = index + by;
       if (target < 0 || target >= next.length) return items;
-      [next[index], next[target]] = [next[target]!, next[index]!];
+      [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
   }
@@ -166,18 +166,21 @@ export function CustomTripPage() {
                 </span>
                 <span className="flex-1 font-semibold">{destination.name}</span>
                 <button
+                  type="button"
                   aria-label={t("customTrip.moveUp")}
                   onClick={() => move(index, -1)}
                 >
                   <ArrowUp />
                 </button>
                 <button
+                  type="button"
                   aria-label={t("customTrip.moveDown")}
                   onClick={() => move(index, 1)}
                 >
                   <ArrowDown />
                 </button>
                 <button
+                  type="button"
                   aria-label={t("customTrip.remove")}
                   onClick={() =>
                     setSelected(

@@ -17,7 +17,8 @@ import {
   Tag,
   UsersRound,
 } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink } from "@/lib/navigation";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/features/auth/auth-context";
 
@@ -43,7 +44,7 @@ const superAdminLinks = [
   ["/admin/audit-logs", "Audit history", History],
 ] as const;
 
-export function OperationsLayout({ driver = false }: { driver?: boolean }) {
+export function OperationsLayout({ driver = false, children }: { driver?: boolean; children?: ReactNode }) {
   const { user, logout } = useAuth();
   const links = driver
     ? ([
@@ -87,6 +88,7 @@ export function OperationsLayout({ driver = false }: { driver?: boolean }) {
             <p className="font-semibold">{user?.name}</p>
           </div>
           <button
+            type="button"
             className="flex items-center gap-2 text-sm font-semibold text-forest"
             onClick={() => void logout()}
           >
@@ -95,7 +97,7 @@ export function OperationsLayout({ driver = false }: { driver?: boolean }) {
           </button>
         </header>
         <main className="p-5 sm:p-8">
-          <Outlet />
+          {children}
         </main>
       </section>
     </div>

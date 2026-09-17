@@ -1,6 +1,6 @@
 import { ArrowRight, CarFront, Crown, MapPinned, ShieldCheck } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import { useTranslation } from 'react-i18next'
 import { Container } from '@/components/ui/Container'
 import { TourCard } from '@/components/catalog/TourCard'

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { CalendarDays, MapPin, Users } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import { driverApi } from '@/features/driver/api'
 import { StatusBadge } from '@/components/operations/StatusBadge'
 

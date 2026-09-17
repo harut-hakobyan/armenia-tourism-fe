@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import type { Media } from '@/types/domain'
 import { cn } from '@/lib/cn'
 

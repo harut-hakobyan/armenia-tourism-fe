@@ -7,7 +7,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "@/lib/navigation";
 import { useTranslation } from "react-i18next";
 import { Container } from "@/components/ui/Container";
 import { TourCard } from "@/components/catalog/TourCard";
@@ -77,6 +77,7 @@ function PremiumCarCard({ car }: { car: Car }) {
 
 export function ToursPage() {
   const { i18n, t } = useTranslation();
+  const { slug: category } = useParams<{ slug?: string }>();
   const [params] = useSearchParams();
   const formatParam = params.get("format");
   const view: TourView =
@@ -88,7 +89,7 @@ export function ToursPage() {
   const format: TourFormat | undefined =
     view === "all" ? undefined : view === "premium" ? "private" : view;
   const tours = useQuery(
-    toursQuery(i18n.language, { ...(format ? { format } : {}), per_page: 24 }),
+    toursQuery(i18n.language, { ...(format ? { format } : {}), ...(category ? { category } : {}), per_page: 24 }),
   );
   const premiumCars = useQuery({
     ...carsQuery({ category: "premium", per_page: 12 }),

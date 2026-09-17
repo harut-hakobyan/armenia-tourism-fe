@@ -97,7 +97,7 @@ export interface DriverAdminInput {
   phone: string;
   email: string;
   password?: string;
-  locale: "en" | "ru" | "hy";
+  locale: "en" | "ru" | "hy" | "fa";
   languages: string[];
   experience_years: number;
   license_number: string;
@@ -113,7 +113,7 @@ export interface DirectoryResponse {
   total: number;
 }
 export interface AdminTranslation {
-  locale: "en" | "ru" | "hy";
+  locale: "en" | "ru" | "hy" | "fa";
   title?: string;
   name?: string;
   short_description: string | null;

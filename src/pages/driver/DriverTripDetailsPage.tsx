@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/lib/navigation'
 import { CarFront, MapPin, MessageCircle, Phone, Users, type LucideIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/operations/StatusBadge'
 import { Button } from '@/components/ui/Button'
@@ -21,7 +21,7 @@ export function DriverTripDetailsPage() {
   const action = trip.driver_trip_status ? nextDriverAction(trip.driver_trip_status) : undefined
 
   return <div className="mx-auto max-w-3xl">
-    <button onClick={() => void navigate(-1)} className="text-sm font-bold text-forest">← My trips</button>
+    <button type="button" onClick={() => void navigate(-1)} className="text-sm font-bold text-forest">← My trips</button>
     <div className="mt-5 flex items-start justify-between gap-4"><div><p className="text-xs text-ink/40">{trip.booking_number}</p><h1 className="mt-1 text-3xl font-bold">{trip.customer.name}</h1></div><StatusBadge status={trip.driver_trip_status ?? trip.booking_status} /></div>
     <div className="mt-7 grid gap-4 sm:grid-cols-2"><Info icon={MapPin} label="Pickup" value={trip.pickup.address} /><Info icon={CarFront} label="Car" value={trip.car?.name ?? 'Not assigned'} /><Info icon={Users} label="Passengers" value={String(trip.passengers)} /><Info icon={Users} label="Attendance" value={`${trip.attendance.checked_in_passengers} / ${trip.passengers} checked in`} /><Info icon={Phone} label="Phone" value={trip.customer.phone} /></div>
     <div className="mt-5 flex gap-3"><a href={`tel:${trip.customer.phone}`} className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-forest/20 bg-white font-bold text-forest"><Phone className="size-4" />Call</a>{trip.customer.whatsapp && <a href={`https://wa.me/${trip.customer.whatsapp.replace(/\D/g, '')}`} className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-forest/20 bg-white font-bold text-forest"><MessageCircle className="size-4" />WhatsApp</a>}</div>

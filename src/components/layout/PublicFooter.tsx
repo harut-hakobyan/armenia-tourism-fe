@@ -1,5 +1,5 @@
 import { Mail, MessageCircle, Mountain, Phone, Send } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Container } from '@/components/ui/Container'

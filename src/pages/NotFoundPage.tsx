@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/navigation'
 import { useTranslation } from 'react-i18next'
 import { Container } from '@/components/ui/Container'
 import { buttonStyles } from '@/components/ui/button-styles'

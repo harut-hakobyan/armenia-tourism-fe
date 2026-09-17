@@ -1,17 +1,16 @@
 import axios, { AxiosError } from 'axios'
-import { i18n } from '@/i18n'
 import { authStorage } from './auth-storage'
 import type { ValidationErrorResponse } from '@/types/api'
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1',
+  baseURL: typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api/v1') : '/api/v1',
   timeout: 15_000,
   headers: { Accept: 'application/json' },
 })
 
 apiClient.interceptors.request.use((config) => {
-  config.headers.set('Accept-Language', i18n.language)
-  if (import.meta.env.VITE_NGROK_SKIP_BROWSER_WARNING === 'true') {
+  config.headers.set('Accept-Language', typeof document === 'undefined' ? 'en' : document.documentElement.lang || 'en')
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_NGROK_SKIP_BROWSER_WARNING === 'true') {
     config.headers.set('ngrok-skip-browser-warning', 'true')
   }
   const token = authStorage.get()

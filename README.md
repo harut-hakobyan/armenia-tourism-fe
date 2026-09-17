@@ -1,12 +1,11 @@
 # Armenia Tourism Frontend
 
-Mobile-first React application for private tours, airport transfers, drivers, and custom journeys across Armenia. It consumes the versioned Laravel API in `../armenia-tourism-be` and contains separate public, admin, and driver route areas.
+Next.js application for private tours, airport transfers, drivers, and custom journeys across Armenia. It consumes the versioned Laravel API in `../armenia-tourism-be` and contains separate public, admin, and driver route areas.
 
 ## Stack
 
 - React 19 and strict TypeScript
-- Vite 8
-- React Router 7
+- Next.js 16 App Router
 - Axios and TanStack Query 5
 - Tailwind CSS 4
 - i18next with English, Russian, and Armenian catalogs
@@ -19,7 +18,7 @@ copy .env.example .env
 npm run dev
 ```
 
-Set `VITE_API_BASE_URL` to the Laravel `/api/v1` URL. No domain is hardcoded in application code.
+Set `NEXT_PUBLIC_API_BASE_URL` for browser requests, `LARAVEL_INTERNAL_API_URL` for server requests, and `SITE_URL` for canonical URLs.
 
 ## Commands
 
@@ -29,6 +28,21 @@ npm run lint
 npm run test
 npm run build
 ```
+
+## Next.js application
+
+The App Router lives in `next-app`. Search-facing pages use server rendering and Laravel data. Booking, account, admin, and driver screens run as client components under the same Next.js route tree.
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run test:next:smoke
+```
+
+Set `LARAVEL_INTERNAL_API_URL` to the server-reachable Laravel `/api/v1` URL and `SITE_URL` to the canonical website origin. Build the production image with `docker build -t armenia-tourism-next .`.
+
+When both services use Docker, attach Next.js to the backend network and use the Laravel Nginx service name, for example `LARAVEL_INTERNAL_API_URL=http://nginx/api/v1`. The smoke test expects a running production server at `http://127.0.0.1:3100` by default; override `NEXT_SMOKE_ORIGIN` when needed.
 
 ## Structure
 
@@ -71,8 +85,19 @@ The camera scanner is available at `/admin/check-in` and `/driver/check-in`. Bro
 ## Production image
 
 ```bash
-docker build --build-arg VITE_API_BASE_URL=https://api.example.com/api/v1 -t armenia-tourism-fe .
-docker run --rm -p 8080:80 armenia-tourism-fe
+docker build --build-arg NEXT_PUBLIC_API_BASE_URL=/api/v1 -t armenia-tourism-fe .
+docker run --rm -p 3000:3000 -e SITE_URL=https://tour-armenia.com -e LARAVEL_INTERNAL_API_URL=http://backend/api/v1 armenia-tourism-fe
 ```
 
-The image uses an Nginx SPA fallback and long-lived caching for fingerprinted assets. TLS should terminate at the deployment edge.
+The image runs the standalone Next.js server. TLS and `/api/v1` proxy routing should terminate at the deployment edge. Copy `.env.production.example` into the deployment environment, replace business values, then validate it before deployment:
+
+```bash
+SITE_URL=https://tour-armenia.com LARAVEL_INTERNAL_API_URL=http://nginx/api/v1 NEXT_PUBLIC_API_BASE_URL=/api/v1 npm run test:production-env
+```
+
+After DNS and HTTPS are active, run the external production check followed by the complete SEO crawl:
+
+```bash
+npm run test:live
+NEXT_SMOKE_ORIGIN=https://tour-armenia.com npm run test:seo
+```

@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from '@/lib/navigation'
 import type { UserRole } from '@/types/domain'
 import { PageLoader } from '@/components/ui/PageLoader'
 import { useAuth } from './auth-context'

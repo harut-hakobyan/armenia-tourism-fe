@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Check, Clock3, MapPin, Route, UsersRound, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "@/lib/navigation";
 import { useTranslation } from "react-i18next";
 import { Container } from "@/components/ui/Container";
 import { PageLoader } from "@/components/ui/PageLoader";

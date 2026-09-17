@@ -1,4 +1,9 @@
 .git
 node_modules
 dist
+.next
+next-app/.next
+next-app/tsconfig.tsbuildinfo
+coverage
 .env
+docs

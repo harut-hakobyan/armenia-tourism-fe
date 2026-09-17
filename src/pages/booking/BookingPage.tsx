@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronRight, Clock3 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
