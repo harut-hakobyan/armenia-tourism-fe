@@ -23,6 +23,9 @@ ENV PORT=3000
 COPY --from=build /app/next-app/.next/standalone ./
 COPY --from=build /app/next-app/.next/static ./next-app/.next/static
 COPY --from=build /app/next-app/public ./next-app/public
+# Next's generated standalone server uses CommonJS. The source repository is
+# ESM, so override the copied root package metadata in the runtime image only.
+RUN printf '{"type":"commonjs"}\n' > package.json
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 \
   CMD node -e "fetch('http://127.0.0.1:3000/robots.txt').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
