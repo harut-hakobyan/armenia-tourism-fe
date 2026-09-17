@@ -452,6 +452,7 @@ export const adminApi = {
     file: File,
     collection?: "cover" | "gallery" | "profile" | "video",
     sortOrder?: number,
+    compress = true,
   ): Promise<Media> => {
     const form = new FormData();
     form.append("file", file);
@@ -460,10 +461,12 @@ export const adminApi = {
       collection ?? (type === "drivers" ? "profile" : "cover"),
     );
     if (sortOrder !== undefined) form.append("sort_order", String(sortOrder));
+    if (collection !== "video") form.append("compress", compress ? "1" : "0");
     return (
       await apiClient.post<ApiEnvelope<Media>>(
         `/admin/media/${type}/${id}`,
         form,
+        { timeout: 120_000 },
       )
     ).data.data;
   },

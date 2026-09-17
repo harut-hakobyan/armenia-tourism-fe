@@ -7,6 +7,7 @@ import { adminApi, type AdminDestination, type DestinationAdminInput } from '@/f
 import { toApiError } from '@/lib/api-client'
 import { Checkbox, NumberField, TextField, TranslationFields } from './AdminCatalogControls'
 import { emptyTranslations, type LocalizedContent } from './admin-catalog-types'
+import { ImageCompressionCheckbox } from './ImageCompressionCheckbox'
 
 interface DestinationForm extends Omit<DestinationAdminInput, 'translations'> {
   translations: LocalizedContent[]
@@ -75,6 +76,7 @@ export function AdminDestinationsPage({ formPage = false }: { formPage?: boolean
   const [form, setForm] = useState<DestinationForm>(emptyForm)
   const [formReady, setFormReady] = useState(routeDestinationId === null)
   const [error, setError] = useState<string | null>(null)
+  const [compressImages, setCompressImages] = useState(true)
   const editingDestination = destinations.data?.data.find((destination) => destination.id === editing)
 
   const refresh = async () => client.invalidateQueries({ queryKey })
@@ -94,7 +96,7 @@ export function AdminDestinationsPage({ formPage = false }: { formPage?: boolean
     onError: (reason) => setError(toApiError(reason).message),
   })
   const upload = useMutation({
-    mutationFn: ({ id, file }: { id: number; file: File }) => adminApi.uploadMedia('destinations', id, file, 'cover'),
+    mutationFn: ({ id, file, compress }: { id: number; file: File; compress: boolean }) => adminApi.uploadMedia('destinations', id, file, 'cover', undefined, compress),
     onSuccess: refresh,
     onError: (reason) => setError(toApiError(reason).message),
   })
@@ -165,10 +167,13 @@ export function AdminDestinationsPage({ formPage = false }: { formPage?: boolean
             <h3 className="font-bold">Destination cover image</h3>
             <p className="mt-1 text-sm text-ink/50">Shown in destination cards and on the destination page.</p>
           </div>
+          <div className="flex flex-wrap items-center gap-3">
+          <ImageCompressionCheckbox checked={compressImages} onChange={setCompressImages} />
           <label className="cursor-pointer rounded-full bg-forest px-4 py-2.5 text-sm font-bold text-white transition hover:bg-forest-light">
             {upload.isPending ? 'Uploading…' : editingDestination.cover_image ? 'Change image' : 'Add image'}
-            <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload.mutate({ id: editingDestination.id, file }); event.target.value = '' }} />
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload.mutate({ id: editingDestination.id, file, compress: compressImages }); event.target.value = '' }} />
           </label>
+          </div>
         </div>
         {editingDestination.cover_image
           ? <div className="mt-5 max-w-xl overflow-hidden rounded-xl bg-white shadow-sm">
@@ -179,7 +184,7 @@ export function AdminDestinationsPage({ formPage = false }: { formPage?: boolean
             </div>
           : <label className="mt-5 grid min-h-32 cursor-pointer place-items-center rounded-xl border-2 border-dashed border-black/10 bg-white text-center transition hover:border-forest/30">
               <span><ImagePlus className="mx-auto size-7 text-forest/40" /><span className="mt-2 block text-sm font-semibold text-ink/55">Click to add a cover image</span><span className="mt-1 block text-xs text-ink/35">JPG, PNG or WebP · up to 10 MB</span></span>
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload.mutate({ id: editingDestination.id, file }); event.target.value = '' }} />
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) upload.mutate({ id: editingDestination.id, file, compress: compressImages }); event.target.value = '' }} />
             </label>}
       </section>}
 
