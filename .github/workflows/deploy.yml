@@ -1,100 +1,174 @@
-name: Deploy Frontend
+name: Build and Deploy Frontend
 
 on:
   push:
     branches:
       - master
       - staging
-
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  IMAGE_TAG: ${{ github.sha }}
+
+concurrency:
+  group: frontend-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'master' && 'production' || 'staging' }}
+
+    steps:
+      - name: Check out frontend
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=/api/v1
+            NEXT_PUBLIC_BOOKING_ASSIGNMENT_ENABLED=${{ vars.BOOKING_ASSIGNMENT_ENABLED || 'false' }}
+            NEXT_PUBLIC_WHATSAPP_NUMBER=${{ vars.WHATSAPP_NUMBER || '37499123456' }}
+            NEXT_BUILD_MEMORY_MB=2048
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy-production:
     if: github.ref == 'refs/heads/master'
+    needs: build
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - name: Deploy frontend to production
+      - name: Deploy frontend image to production
         uses: appleboy/ssh-action@v1.2.5
+        env:
+          FRONTEND_IMAGE: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          GHCR_USERNAME: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.PROD_PORT }}
           command_timeout: 10m
+          envs: FRONTEND_IMAGE,GHCR_USERNAME,GHCR_TOKEN
           script: |
-            set -e
+            set -eu
 
-            cd /home/ubuntu/armenia-tourism/armenia-tourism-fe
+            cd /home/ubuntu/armenia-tourism/armenia-tourism-be
 
-            git fetch origin
-            git reset --hard origin/master
+            printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USERNAME" --password-stdin
+            trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+            PREVIOUS_IMAGE="$(docker inspect --format '{{.Config.Image}}' armenia-tourism-be-frontend-1 2>/dev/null || true)"
+            FRONTEND_IMAGE="$FRONTEND_IMAGE" docker compose pull frontend
 
-            cd ../armenia-tourism-be
+            deployment_failed=0
+            if ! FRONTEND_IMAGE="$FRONTEND_IMAGE" docker compose up -d --wait --wait-timeout 180 \
+              --no-deps --force-recreate frontend; then
+              deployment_failed=1
+            elif ! docker compose exec -T nginx nginx -s reload; then
+              deployment_failed=1
+            else
+              NGINX_ENDPOINT="$(docker compose port nginx 80)"
+              if [ -z "$NGINX_ENDPOINT" ] || ! curl --fail --silent --show-error \
+                --retry 10 --retry-delay 3 "http://${NGINX_ENDPOINT}/robots.txt" >/dev/null; then
+                deployment_failed=1
+              fi
+            fi
 
-            docker compose build frontend
-
-            if ! docker compose up -d --wait --wait-timeout 180 \
-              --no-deps \
-              --force-recreate \
-              frontend; then
+            if [ "$deployment_failed" -ne 0 ]; then
               docker compose ps
               docker compose logs --tail=200 frontend nginx
-              docker inspect --format '{{json .State.Health}}' armenia-tourism-be-frontend-1 || true
+              if [ -n "$PREVIOUS_IMAGE" ]; then
+                FRONTEND_IMAGE="$PREVIOUS_IMAGE" docker compose up -d --wait --wait-timeout 180 \
+                  --no-deps --force-recreate frontend
+                docker compose exec -T nginx nginx -s reload
+              fi
               exit 1
             fi
 
-            docker compose exec -T nginx nginx -s reload
-
-            NGINX_ENDPOINT="$(docker compose port nginx 80)"
-            test -n "$NGINX_ENDPOINT"
-            curl --fail --silent --show-error --retry 10 --retry-delay 3 \
-              "http://${NGINX_ENDPOINT}/robots.txt" >/dev/null
-
+            if [ -n "$PREVIOUS_IMAGE" ] && [ "$PREVIOUS_IMAGE" != "$FRONTEND_IMAGE" ]; then
+              docker image rm "$PREVIOUS_IMAGE" >/dev/null 2>&1 || true
+            fi
             docker image prune -f
 
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
+    needs: build
     runs-on: ubuntu-latest
     environment: staging
 
     steps:
-      - name: Deploy frontend to staging
+      - name: Deploy frontend image to staging
         uses: appleboy/ssh-action@v1.2.5
+        env:
+          FRONTEND_IMAGE: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          GHCR_USERNAME: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USERNAME }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           port: ${{ secrets.STAGING_PORT }}
           command_timeout: 10m
+          envs: FRONTEND_IMAGE,GHCR_USERNAME,GHCR_TOKEN
           script: |
-            set -e
+            set -eu
 
-            cd /home/ubuntu/armenia-tourism/armenia-tourism-fe
+            cd /home/ubuntu/armenia-tourism/armenia-tourism-be
 
-            git fetch origin
-            git reset --hard origin/staging
+            printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USERNAME" --password-stdin
+            trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+            PREVIOUS_IMAGE="$(docker inspect --format '{{.Config.Image}}' armenia-tourism-be-frontend-1 2>/dev/null || true)"
+            FRONTEND_IMAGE="$FRONTEND_IMAGE" docker compose pull frontend
 
-            cd ../armenia-tourism-be
+            deployment_failed=0
+            if ! FRONTEND_IMAGE="$FRONTEND_IMAGE" docker compose up -d --wait --wait-timeout 180 \
+              --no-deps --force-recreate frontend; then
+              deployment_failed=1
+            elif ! docker compose exec -T nginx nginx -s reload; then
+              deployment_failed=1
+            else
+              NGINX_ENDPOINT="$(docker compose port nginx 80)"
+              if [ -z "$NGINX_ENDPOINT" ] || ! curl --fail --silent --show-error \
+                --retry 10 --retry-delay 3 "http://${NGINX_ENDPOINT}/robots.txt" >/dev/null; then
+                deployment_failed=1
+              fi
+            fi
 
-            docker compose build frontend
-
-            if ! docker compose up -d --wait --wait-timeout 180 \
-              --no-deps \
-              --force-recreate \
-              frontend; then
+            if [ "$deployment_failed" -ne 0 ]; then
               docker compose ps
               docker compose logs --tail=200 frontend nginx
-              docker inspect --format '{{json .State.Health}}' armenia-tourism-be-frontend-1 || true
+              if [ -n "$PREVIOUS_IMAGE" ]; then
+                FRONTEND_IMAGE="$PREVIOUS_IMAGE" docker compose up -d --wait --wait-timeout 180 \
+                  --no-deps --force-recreate frontend
+                docker compose exec -T nginx nginx -s reload
+              fi
               exit 1
             fi
 
-            docker compose exec -T nginx nginx -s reload
-
-            NGINX_ENDPOINT="$(docker compose port nginx 80)"
-            test -n "$NGINX_ENDPOINT"
-            curl --fail --silent --show-error --retry 10 --retry-delay 3 \
-              "http://${NGINX_ENDPOINT}/robots.txt" >/dev/null
-
+            if [ -n "$PREVIOUS_IMAGE" ] && [ "$PREVIOUS_IMAGE" != "$FRONTEND_IMAGE" ]; then
+              docker image rm "$PREVIOUS_IMAGE" >/dev/null 2>&1 || true
+            fi
             docker image prune -f
